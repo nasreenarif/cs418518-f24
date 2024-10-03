@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { connection } from "../database/database.js";
+import { ComparePasword, HashedPassword } from "../utils/helper.js";
+import { SendMail } from "../utils/SendMail.js";
 const user = Router();
 
 user.get("/", (req, res) => {
@@ -35,9 +37,12 @@ user.get("/:id", (req, res) => {
 });
 
 user.post("/", (req, res) => {
+
+  const hashedPassword = HashedPassword(req.body.password)
+
   connection.execute(
     "Insert into user_information (First_Name,Last_Name,Email,Password) values(?,?,?,?)",
-    [req.body.firstName,req.body.lastName,req.body.email,req.body.password],
+    [req.body.firstName, req.body.lastName, req.body.email, hashedPassword],
     function (err, result) {
       if (err) {
         res.json(err.message);
@@ -76,7 +81,7 @@ user.put("/:id", (req, res) => {
   connection.execute(
     "update user_information set First_Name=? , Last_Name=? where user_id=?",
     [req.body.firstName,
-      req.body.lastName,
+    req.body.lastName,
     req.params.id],
     function (err, result) {
       if (err) {
@@ -95,17 +100,27 @@ user.put("/:id", (req, res) => {
 
 user.post("/login", (req, res) => {
   connection.execute(
-    "select * from user_information where email=? and password=?",
-    [req.body.email,req.body.password],
+    "select * from user_information where email=?",
+    [req.body.email],
     function (err, result) {
       if (err) {
         res.json(err.message);
       } else {
-        res.json({
-          status: 200,
-          message: "user logged in successfully",
-          data: result,
-        });
+        console.log(result[0].PASSWORD);
+        if (ComparePasword(req.body.password, result[0].PASSWORD)) {
+
+          SendMail(req.body.email,"Login Verification","Your login verification is 1234567")
+
+          res.json({
+            status: 200,
+            message: "user logged in successfully",
+            data: result,
+          });
+        }
+        else {
+          res.json("Invalid Password");
+        }
+
       }
     }
   );
