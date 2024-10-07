@@ -129,4 +129,60 @@ user.post("/login", (req, res) => {
   );
 });
 
+user.post("/change-password", (req, res) => {
+  // Step 1: Select the user based on email
+  connection.execute(
+    "select * from userdata where email=?",
+    [req.body.email],
+    function (err, result) {
+      if (err) {
+        res.json({
+          status: 500,
+          message: err.message,
+        });
+      } else if (result.length === 0) {
+        // User not found
+        res.json({
+          status: 404,
+          message: "User not found.",
+        });
+      } else {
+        // Step 2: Verify the current password
+        const user = result[0];
+        if (ComparePasword(req.body.currentPassword, user.Password)) {
+          // Step 3: Hash the new password
+          const newHashedPassword = HashedPassword(req.body.newPassword);
+
+          // Step 4: Update the password in the database
+          connection.execute(
+            "update userdata set Password=? where email=?",
+            [newHashedPassword, req.body.email],
+            function (updateErr, updateResult) {
+              if (updateErr) {
+                res.json({
+                  status: 500,
+                  message: updateErr.message,
+                });
+              } else {
+                // Step 5: Respond with success message
+                res.json({
+                  status: 200,
+                  message: "Password changed successfully.",
+                  data: updateResult,
+                });
+              }
+            }
+          );
+        } else {
+          // Invalid current password
+          res.json({
+            status: 401,
+            message: "Invalid current password.",
+          });
+        }
+      }
+    }
+  );
+});
+
 export default user;

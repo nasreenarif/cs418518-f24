@@ -49,7 +49,7 @@
         }
 
         input[type="email"],
-        input[type="password"] {
+        input[type="Password"] {
             padding: 10px;
             margin-top: 5px;
             font-size: 16px;
@@ -109,26 +109,40 @@
         <h1>Archer Advising Portal</h1>
         <p>CS418 Web Programming Fall 2024</p>
     </header>
+    <div> id="login"
+        <div className="controls">
+            <h2>Login</h2>
+            <form action="/login" method="POST">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required
+                    className={emailNotValid ? "invalid" : undefined} onChange={(event)=>
+                handleInputChange("email", event.target.value)
+                }
+                />
+                <label for="Password">Password:</label>
+                <input type="Password" id="Password" name="Password" placeholder="Enter your Password" required
+                    className={passwordNotValid ? "invalid" : undefined} onChange={(event)=>
+                handleInputChange("Password", event.target.value)
+                }
+                />
 
-    <div class="login-container">
-        <h2>Login</h2>
-        <form action="/login" method="POST">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email" required>
-
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
-
-            <input type="submit" value="Login">
-        </form>
-        <div class="create-account">
-            <p>Don't have an account? <a href="login/create">Create Account</a></p>
-        </div>
-        <div class="extra-options">
-            <a href="login/reset">Forgot your password?</a>
+                <div className="actions">
+                    <button type="button" className="text-button">
+                        Create a new account
+                    </button>
+                    <button className="button" onClick={handleLogin}>
+                        Sign In
+                    </button>
+                </div>
+            </form>
+            <div class="create-account">
+                <p>Don't have an account? <a href="login/create">Create Account</a></p>
+            </div>
+            <div class="extra-options">
+                <a href="login/reset">Forgot your password?</a>
+            </div>
         </div>
     </div>
-
 </body>
 
 </html>
