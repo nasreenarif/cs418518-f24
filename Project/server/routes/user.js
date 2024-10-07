@@ -5,7 +5,7 @@ import { SendMail } from "../utils/SendMail.js";
 const user = Router();
 
 user.get("/", (req, res) => {
-  connection.execute("select * from user_information", function (err, result) {
+  connection.execute("select * from userdata", function (err, result) {
     if (err) {
       res.json(err.message);
     } else {
@@ -20,7 +20,7 @@ user.get("/", (req, res) => {
 
 user.get("/:id", (req, res) => {
   connection.execute(
-    "select * from user_information where user_id=?",
+    "select * from userdata where user_id=?",
     [req.params.id],
     function (err, result) {
       if (err) {
@@ -41,7 +41,7 @@ user.post("/", (req, res) => {
   const hashedPassword = HashedPassword(req.body.password)
 
   connection.execute(
-    "Insert into user_information (First_Name,Last_Name,Email,Password) values(?,?,?,?)",
+    "Insert into userdata (First_Name,Last_Name,Email,Password) values(?,?,?,?)",
     [req.body.firstName, req.body.lastName, req.body.email, hashedPassword],
     function (err, result) {
       if (err) {
@@ -49,7 +49,7 @@ user.post("/", (req, res) => {
       } else {
         res.json({
           status: 200,
-          message: "Response from user post api",
+          message: "Repsonse from POST API, attempting add user",
           data: result,
         });
       }
@@ -60,7 +60,7 @@ user.post("/", (req, res) => {
 
 user.delete("/:id", (req, res) => {
   connection.execute(
-    "delete from user_information where user_id=?",
+    "delete from userdata where user_id=?",
     [req.params.id],
     function (err, result) {
       if (err) {
@@ -68,7 +68,7 @@ user.delete("/:id", (req, res) => {
       } else {
         res.json({
           status: 200,
-          message: "Response from user delete api",
+          message: "Response from DELETE API, attempting user delete",
           data: result,
         });
       }
@@ -79,7 +79,7 @@ user.delete("/:id", (req, res) => {
 
 user.put("/:id", (req, res) => {
   connection.execute(
-    "update user_information set First_Name=? , Last_Name=? where user_id=?",
+    "update userdata set First_Name=? , Last_Name=? where user_id=?",
     [req.body.firstName,
     req.body.lastName,
     req.params.id],
@@ -100,7 +100,7 @@ user.put("/:id", (req, res) => {
 
 user.post("/login", (req, res) => {
   connection.execute(
-    "select * from user_information where email=?",
+    "select * from userdata where email=?",
     [req.body.email],
     function (err, result) {
       if (err) {
@@ -109,7 +109,7 @@ user.post("/login", (req, res) => {
         console.log(result[0].PASSWORD);
         if (ComparePasword(req.body.password, result[0].PASSWORD)) {
 
-          SendMail(req.body.email,"Login Verification","Your login verification is 1234567")
+          SendMail(req.body.email, "Login Verification", "Your login verification is 1234567")
 
           res.json({
             status: 200,
