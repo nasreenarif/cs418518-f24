@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create a new account">
+    <title>Create Account</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .create-account-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input[type="submit"] {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #00539C;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #003d75;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="create-account-container">
+        <h2>Create Account</h2>
+        <form action="/create-account" method="POST">
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+
+            <label for="address">Physical Address:</label>
+            <textarea id="address" name="address" rows="3" placeholder="Enter your physical address"
+                required></textarea>
+
+            <label for="security-question">Security Question:</label>
+            <select id="security-question" name="security-question" required>
+                <option value="" disabled selected>Select a security question</option>
+                <option value="pet">What was the name of your first pet?</option>
+                <option value="mother-maiden">What is your mother’s maiden name?</option>
+                <option value="birthplace">In what city were you born?</option>
+                <option value="school">What was the name of your elementary school?</option>
+            </select>
+
+            <label for="security-answer">Security Answer:</label>
+            <input type="text" id="security-answer" name="security-answer" placeholder="Enter your answer" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+
+            <input type="submit" value="Create Account">
+        </form>
+    </div>
+
+</body>
+
+</html>

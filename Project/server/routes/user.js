@@ -105,9 +105,12 @@ user.post("/login", (req, res) => {
     function (err, result) {
       if (err) {
         res.json(err.message);
-      } else {
-        console.log(result[0].PASSWORD);
-        if (ComparePasword(req.body.password, result[0].PASSWORD)) {
+      } else if (result.length === 0) {
+        res.json("Credentials Invalid user.js");  //change JOIN to JSON
+      }
+      else {
+        console.log(result[0].Password);
+        if (ComparePasword(req.body.Password, result[0].Password)) {
 
           SendMail(req.body.email, "Login Verification", "Your login verification is 1234567")
 
