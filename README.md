@@ -9,7 +9,7 @@
 * An admin user has a different view from a regular user. (Later admin will approve the submitted advising sheet by student)
 
 # Finished Items
-* The website should have a homepage for each user, where they can view their profiles, change passwords, and update information. Email cannot not be changed
+* The website should have a homepage for each user, where they can view their profiles, change passwords, and update information. Email cannot not be changed //update information updates all database entries
 * Users should be able to register new accounts using email addresses
 * Users cannot register duplicate accounts using the same email address
 * Users are identified by email address
