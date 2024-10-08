@@ -54,11 +54,16 @@ export default function Dashboard() {
                 </p>
             </section>
 
-            {/* Add link to change password page */}
+
             <section style={styles.passwordSection}>
-                <Link to="/change-password" style={styles.link}>
+                <a href="/change-password" style={styles.link}>
                     Change Password
-                </Link>
+                </a>
+            </section>
+            <section style={styles.passwordSection}>
+                <a href="/change-info" style={styles.link}>
+                    Change Info
+                </a>
             </section>
         </div>
     );

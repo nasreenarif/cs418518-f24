@@ -121,17 +121,22 @@ export default function Login() {
                         </button>
                         <button className="button" style={styles.button} type="submit">
                             Sign In
+                            {/* <a href="/verify-code">Sign In </a> */}
                         </button>
                     </div>
                 </form>
 
                 <div className="create-account" style={styles.createAccount}>
-                    <p>
-                        Don't have an account? <a href="login/create">Create Account</a>
-                    </p>
+                    <div style={styles.createAccount}>
+                        <p>
+                            Don't have an account? <a href="/create-account">Create Account</a>
+                        </p>
+                    </div>
                 </div>
                 <div className="extra-options" style={styles.extraOptions}>
-                    <a href="login/reset">Forgot your password?</a>
+                    <div style={styles.forgotPassword}>
+                        <a href="/forgot-password">Forgot your password?</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -188,5 +193,8 @@ const styles = {
         textAlign: "center",
         marginTop: "15px",
     },
+    forgotPassword: {
+        marginTop: '10px',
+        textAlign: 'center',
+    },
 };
-
