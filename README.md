@@ -5,11 +5,11 @@
 # Things To Do 
 * Users cannot log in to the system until their email has been verified
 * A 2-factor-authentication should be used when a user attempt to login. This can be done by email, phone text, or a DUO push. You can just implement one of them
-* The website should have a homepage for each user, where they can view their profiles, change passwords, and update information. Email cannot not be changed
 * An admin user should be created from the backend. (Only 1)
 * An admin user has a different view from a regular user. (Later admin will approve the submitted advising sheet by student)
 
 # Finished Items
+* The website should have a homepage for each user, where they can view their profiles, change passwords, and update information. Email cannot not be changed
 * Users should be able to register new accounts using email addresses
 * Users cannot register duplicate accounts using the same email address
 * Users are identified by email address
