@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Login.css";
 
 
 export default function Login() {
@@ -48,12 +49,13 @@ export default function Login() {
     return (
         <div id="login">
             {/* {message && <label>{message}</label>} */}
+            <p style={{color:"red"}}>Learning Styling Components</p>
             <div className="controls">
                 <p>
                     <label>Email</label>
                     <input
                         type="email"
-                        className={emailNotValid ? "invalid" : undefined}
+                        className={emailNotValid ? "invalid" : undefined}                        
                         onChange={(event) => handleInputChange("email", event.target.value)}
                     />
                 </p>
