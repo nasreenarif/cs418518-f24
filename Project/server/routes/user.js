@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { connection } from "../database/database.js";
 import { ComparePasword, HashedPassword } from "../utils/helper.js";
-import { SendMail } from "../utils/SendMail.js";
 const user = Router();
 
 user.get("/", (req, res) => {
@@ -109,7 +108,7 @@ user.post("/login", (req, res) => {
         console.log(result[0].PASSWORD);
         if (ComparePasword(req.body.password, result[0].PASSWORD)) {
 
-          SendMail(req.body.email,"Login Verification","Your login verification is 1234567")
+          // SendMail(req.body.email,"Login Verification","Your login verification is 1234567")
 
           res.json({
             status: 200,
