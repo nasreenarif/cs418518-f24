@@ -199,14 +199,14 @@ export default function Login() {
                 )}
                 <div className="create-account" style={styles.createAccount}>
                     <div style={styles.createAccount}>
-                        <p>
-                            Don't have an account? <a href="/create-account">Create Account</a>
+                        <p style={{ color: 'black' }}>
+                            Don't have an account? <a href="/create-account" style={styles.link}>Create Account</a>
                         </p>
                     </div>
                 </div>
                 <div className="extra-options" style={styles.extraOptions}>
                     <div style={styles.forgotPassword}>
-                        <a href="/forgot-password">Forgot your password?</a>
+                        <a href="/forgot-password" style={styles.link}>Forgot your password?</a>
                     </div>
                 </div>
             </div>
@@ -262,6 +262,7 @@ const styles = {
         cursor: "pointer",
     },
     createAccount: {
+        color: "black",
         textAlign: "center",
         marginTop: "20px",
     },
@@ -272,5 +273,9 @@ const styles = {
     forgotPassword: {
         marginTop: '10px',
         textAlign: 'center',
+    },
+    link: {
+        color: "#00539C", // Change to desired color
+        cursor: "pointer",
     },
 };
