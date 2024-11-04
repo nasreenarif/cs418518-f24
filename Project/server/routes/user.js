@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { connection } from "../database/database.js";
+
 import { ComparePassword, HashedPassword } from "../utils/helper.js";
 import { SendMail } from "../utils/SendMail.js";
 import * as crypto from "crypto"; //generates tokens
+
 const user = Router();
 
 function generateTempPassword(length = 12) {    //forgot password
@@ -218,9 +220,13 @@ user.post("/login", (req, res) => { //login and 2FA process
 
           console.log(result[0].Password);
 
+
           if (ComparePassword(req.body.Password, result[0].Password)) { //if passwords match...
             const Code2FA = generateRandomCode(); //generate 2FA code
             const Code2FAExpires = Date.now() + 5 * 60 * 1000;  //create expiration of 2FA code
+
+          // SendMail(req.body.email,"Login Verification","Your login verification is 1234567")
+
 
             connection.execute(
               'UPDATE userdata SET Code2FA=?, Code2FAExpires=? WHERE email=?',
