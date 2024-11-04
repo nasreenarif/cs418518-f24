@@ -15,7 +15,7 @@ export default function Dashboard() {
     return (
         <div style={styles.body}>
             <header style={styles.header}>
-                <h1>Archer Advising Portal</h1>
+                <h1 style={styles.headerTitle}>Archer Advising Portal</h1>
                 <div>
                     <p>Welcome, {enteredEmail}</p> {/* put username here */}
                 </div>
@@ -81,6 +81,10 @@ const styles = {
         color: '#fff',
         padding: '20px',
         textAlign: 'center',
+    },
+    headerTitle: {
+        fontFamily: "Georgia, serif",
+        fontSize: "28px",
     },
     nav: {
         display: 'flex',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ChangePassword() {
     const [email, setEmail] = useState('');
@@ -7,6 +8,7 @@ export default function ChangePassword() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [passwordSuccess, setPasswordSuccess] = useState('');
+    const navigate = useNavigate();
 
     const handleChangePassword = async (event) => {
         event.preventDefault();
@@ -50,7 +52,7 @@ export default function ChangePassword() {
     };
 
     return (
-        <div style={styles.body}>
+        <div style={styles.container}>
             <h2>Change Password</h2>
             <form onSubmit={handleChangePassword} style={styles.form}>
                 <div>
@@ -103,6 +105,10 @@ export default function ChangePassword() {
 
                 <button type="submit" style={styles.button}>Change Password</button>
             </form>
+            {/* Back to Dashboard Button */}
+            <button onClick={() => navigate('/dashboard')} style={styles.backButton}>
+                Back to Dashboard
+            </button>
 
             {/* Display error or success messages */}
             {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
@@ -112,31 +118,51 @@ export default function ChangePassword() {
 }
 
 const styles = {
-    body: {
-        fontFamily: 'Arial, sans-serif',
-        margin: '20px',
-        padding: '20px',
-        backgroundColor: '#f4f4f9',
+    container: {
+        backgroundColor: 'white',
+        padding: '40px',
+        margin: '50px auto',
+        borderRadius: '8px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        width: '400px',
+        textAlign: 'center',
+    },
+    heading: {
+        marginBottom: '20px',
+        fontSize: '24px',
+        fontWeight: 'bold',
     },
     form: {
         display: 'flex',
         flexDirection: 'column',
-        width: '300px',
-        margin: '0 auto',
     },
     input: {
         padding: '10px',
         marginBottom: '10px',
         borderRadius: '4px',
         border: '1px solid #ccc',
+        width: '100%',
     },
     button: {
         padding: '10px',
         fontSize: '16px',
         backgroundColor: '#00539C',
         color: 'white',
-        border: 'none',
         borderRadius: '4px',
         cursor: 'pointer',
+        width: '100%',
+        border: 'none',
+        marginTop: '20px',
+    },
+    backButton: {
+        padding: '10px',
+        fontSize: '16px',
+        backgroundColor: '#e0e0e0',
+        color: '#333',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        width: '100%',
+        border: 'none',
+        marginTop: '10px',
     },
 };

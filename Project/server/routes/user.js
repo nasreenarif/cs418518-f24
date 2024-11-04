@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { connection } from "../database/database.js";
-import { ComparePasword, HashedPassword } from "../utils/helper.js";
+import { ComparePassword, HashedPassword } from "../utils/helper.js";
 import { SendMail } from "../utils/SendMail.js";
+import * as crypto from "crypto"; //generates tokens
 const user = Router();
 
 function generateTempPassword(length = 12) {    //forgot password
@@ -14,7 +15,104 @@ function generateTempPassword(length = 12) {    //forgot password
   return password;
 }
 
-user.get("/", (req, res) => {
+function generateRandomCode() {
+  return Math.floor(100000 + Math.random() * 900000); //generate 6-digit code
+}
+
+user.post("/", (req, res) => {  //create account process
+  const { firstName, lastName, email, password } = req.body;
+
+  // Check if email already exists
+  connection.execute(
+    "SELECT * FROM userdata WHERE Email=?",
+    [email],
+    function (err, result) {
+      if (err) {
+        return res.status(500).json({ message: "Server error" });
+      }
+
+      if (result.length > 0) {
+        // Email already exists
+        return res.status(409).json({ message: "Email already exists" });
+      }
+
+      // Create new account
+      const hashedPassword = HashedPassword(password);
+      const verificationToken = crypto.randomBytes(32).toString("hex"); //generates unique token
+
+
+      connection.execute(
+        "INSERT INTO userdata (First_Name, Last_Name, Email, Password, isVerified, VerificationToken) VALUES (?, ?, ?, ?, ?, ?)",
+        [firstName, lastName, email, hashedPassword, 0, verificationToken],
+        function (err, result) {
+          if (err) {
+            return res.status(500).json({ message: "Server error" });
+          }
+
+          const verificationLink = `http://localhost:8080/user/verify?token=${verificationToken}`;
+          SendMail(email, "Archer Advising Email Verification", `Please verify your account by clicking this link: ${verificationLink}`);
+
+          return res.status(200).json({ message: "Account created successfully, please verify account using email link" });
+        }
+      );
+    }
+  );
+});
+
+user.get("/verify", async (req, res) => {
+  console.log("Verification route accessed");
+
+  const { token } = req.query;
+  console.log("Received token:", token);
+
+  if (!token) {
+    console.log("No token provided");
+    return res.status(400).json({ message: "Verification token is missing" });
+  }
+
+  // Check if the token exists in the database
+  connection.execute(
+    "SELECT * FROM userdata WHERE verificationToken=?",
+    [token],
+    function (err, result) {
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ message: "Server error" });
+      }
+
+      if (result.length === 0) {
+        console.log("Token not found in database.");
+        return res.status(400).json({ message: "Invalid or expired verification link" });
+      }
+
+      // Debugging log
+      console.log("Token found, updating isVerified status...");
+
+      // Update isVerified to 1 and remove the token to prevent reuse
+      connection.execute(
+        "UPDATE userdata SET isVerified=1, verificationToken=NULL WHERE verificationToken=?",
+        [token],
+        function (err, updateResult) {
+          if (err) {
+            console.error("Update error:", err);
+            return res.status(500).json({ message: "Server error during update" });
+          }
+
+          if (updateResult.affectedRows === 0) {
+            console.log("No rows updated, something went wrong.");
+            return res.status(500).json({ message: "Verification failed" });
+          }
+
+          console.log("Log - Account Verified.");
+          return res.status(200).json({ message: "Account verified successfully, you may close this window" });
+        }
+      );
+    }
+  );
+});
+
+//older user.get methods
+/* user.get("/", (req, res) => {
   connection.execute("select * from userdata", function (err, result) {
     if (err) {
       res.json(err.message);
@@ -44,42 +142,7 @@ user.get("/:id", (req, res) => {
       }
     }
   );
-});
-
-user.post("/", (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
-
-  // Check if email already exists
-  connection.execute(
-    "SELECT * FROM userdata WHERE Email=?",
-    [email],
-    function (err, result) {
-      if (err) {
-        return res.status(500).json({ message: "Server error" });
-      }
-
-      if (result.length > 0) {
-        // Email already exists
-        return res.status(409).json({ message: "Email already exists" });
-      }
-
-      // Create new account
-      const hashedPassword = HashedPassword(password);
-      connection.execute(
-        "INSERT INTO userdata (First_Name, Last_Name, Email, Password) VALUES (?, ?, ?, ?)",
-        [firstName, lastName, email, hashedPassword],
-        function (err, result) {
-          if (err) {
-            return res.status(500).json({ message: "Server error" });
-          }
-          return res.status(200).json({ message: "Account created successfully" });
-        }
-      );
-    }
-  );
-});
-
-
+}); */
 
 user.delete("/:id", (req, res) => {
   connection.execute(
@@ -121,32 +184,51 @@ user.put("/:id", (req, res) => {
 });
 
 
-user.post("/login", (req, res) => {
+user.post("/login", (req, res) => { //login and 2FA process
   connection.execute(
     "select * from userdata where email=?",
     [req.body.email],
     function (err, result) {
       if (err) {
-        res.json(err.message);
-      } else if (result.length === 0) {
-        res.json("Credentials Invalid user.js");  //change JOIN to JSON
-      }
-      else {
-        console.log(result[0].Password);
-        if (ComparePasword(req.body.Password, result[0].Password)) {
+        res.json({ status: 500, message: err.message });
+      } else if (result.length === 0) { //checks if user exists
+        res.json({ status: 401, message: "Invalid credentials" });
+      } else {
+        // Check if the user is verified
+        if (result[0].isVerified === 0) {
+          res.json({ status: 403, message: "Please verify your email before logging in." });
+        } else {
 
-          SendMail(req.body.email, "Login Verification", "Your login verification is 1234567")
+          console.log(result[0].Password);
 
-          res.json({
-            status: 200,
-            message: "user logged in successfully",
-            data: result,
-          });
+          if (ComparePassword(req.body.Password, result[0].Password)) { //if passwords match...
+            const Code2FA = generateRandomCode(); //generate 2FA code
+            const Code2FAExpires = Date.now() + 5 * 60 * 1000;  //create expiration of 2FA code
+
+            connection.execute(
+              'UPDATE userdata SET Code2FA=?, Code2FAExpires=? WHERE email=?',
+              [Code2FA, Code2FAExpires, req.body.email],
+              (err) => {
+                if (err) {
+                  return res.status(500).json({ message: 'Error saving 2FA code' });
+                }
+
+
+                // Send the 2FA code by email
+                SendMail(req.body.email, 'Your 2FA Code', `Your 2FA code is: ${Code2FA}`);
+                /* res.status(200).json({ message: '2FA code sent to your email' }); */
+              }
+            );
+
+            res.json({
+              status: 200,
+              message: "User sent 2FA Code",
+              data: result,
+            });
+          } else {
+            res.json({ status: 401, message: "Invalid password" });
+          }
         }
-        else {
-          res.json("Invalid Password");
-        }
-
       }
     }
   );
@@ -172,7 +254,7 @@ user.post("/change-password", (req, res) => {
       } else {
         // Step 2: Verify the current password
         const user = result[0];
-        if (ComparePasword(req.body.currentPassword, user.Password)) {
+        if (ComparePassword(req.body.currentPassword, user.Password)) {
           // Step 3: Hash the new password
           const newHashedPassword = HashedPassword(req.body.newPassword);
 
@@ -241,6 +323,42 @@ user.post("/forgot-password", (req, res) => {
         return res.status(200).json({ message: "Password reset link has been sent to your email." });
       });
   }
+  );
+});
+
+user.post('/verify-code', (req, res) => {
+  const { email, Code2FA } = req.body;
+
+  connection.execute(
+    'SELECT Code2FA, Code2FAExpires FROM userdata WHERE email=?',
+    [email],
+    (err, result) => {
+      if (err) return res.status(500).json({ message: 'Server error' });
+
+      if (result.length === 0) return res.status(401).json({ message: 'User not found' });
+
+      const user = result[0];
+
+      // Check if 2FA code is valid and not expired
+      if (user.Code2FA !== parseInt(Code2FA, 10)) {
+        return res.status(401).json({ message: 'Invalid 2FA code' });
+      }
+
+      if (Date.now() > user.Code2FAExpires) {
+        return res.status(401).json({ message: '2FA code expired' });
+      }
+
+      // Clear the 2FA code after successful verification
+      connection.execute(
+        'UPDATE userdata SET Code2FA=NULL, Code2FAExpires=NULL WHERE email=?',
+        [email],
+        (err) => {
+          if (err) return res.status(500).json({ message: 'Error clearing 2FA code' });
+
+          res.status(200).json({ message: 'Login successful' });
+        }
+      );
+    }
   );
 });
 

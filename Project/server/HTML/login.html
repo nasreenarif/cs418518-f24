@@ -33,6 +33,10 @@
             width: 300px;
         }
 
+        h1 {
+            font-family: Arial, sans-serif;
+        }
+
         h2 {
             text-align: center;
             color: #333;
@@ -109,32 +113,27 @@
         <h1>Archer Advising Portal</h1>
         <p>CS418 Web Programming Fall 2024</p>
     </header>
-    <div> id="login"
-        <div className="controls">
+
+    <div id="login">
+        <div class="controls">
             <h2>Login</h2>
             <form action="/login" method="POST">
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email" required
-                    className={emailNotValid ? "invalid" : undefined} onChange={(event)=>
-                handleInputChange("email", event.target.value)
-                }
-                />
-                <label for="Password">Password:</label>
-                <input type="Password" id="Password" name="Password" placeholder="Enter your Password" required
-                    className={passwordNotValid ? "invalid" : undefined} onChange={(event)=>
-                handleInputChange("Password", event.target.value)
-                }
-                />
+                <input type="email" id="email" name="email" placeholder="Enter your email" required />
 
-                <div className="actions">
-                    <button type="button" className="text-button">
+                <label for="Password">Password:</label>
+                <input type="Password" id="Password" name="Password" placeholder="Enter your Password" required />
+
+                <div class="actions">
+                    <button type="button" class="text-button">
                         Create a new account
                     </button>
-                    <button className="button" onClick={handleLogin}>
+                    <button class="button" type="submit">
                         Sign In
                     </button>
                 </div>
             </form>
+
             <div class="create-account">
                 <p>Don't have an account? <a href="login/create">Create Account</a></p>
             </div>
