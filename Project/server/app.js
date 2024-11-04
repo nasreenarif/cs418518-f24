@@ -17,6 +17,7 @@ app.use(myLogger);
 app.use(bodyParser.json());
 app.use(cors({
     origin: "http://localhost:5173"
+    /* origin: "*" */   //needs edit?
 }))
 app.use('/user', user);
 
