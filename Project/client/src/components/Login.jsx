@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
+
 /* import "../styles/loginStyle.css" */
+
 
 
 export default function Login() {
@@ -128,6 +130,7 @@ export default function Login() {
     const passwordNotValid = submitted && enteredPassword.trim().length < 6;
 
     return (
+
         <div>
             <header style={{ backgroundColor: "#00539C", color: "#fff", padding: "20px", textAlign: "center" }}>
                 <h1 style={styles.headerTitle}>Welcome to Archer Advising</h1>
