@@ -70,7 +70,7 @@ export default function CreateAccount() {
                     <input
                         type="text"
                         id="lastName"
-                        value={Last_Name}
+                        value={Last_Name}   //actual database attribute name
                         onChange={(e) => setLastName(e.target.value)}
                         required
                         style={styles.input}

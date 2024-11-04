@@ -183,6 +183,23 @@ user.put("/:id", (req, res) => {
   );
 });
 
+user.get("/:id", (req, res) => {
+  connection.execute(
+    "select * from userdata where id=?",
+    [req.params.id],
+    function (err, result) {
+      if (err) {
+        res.json(err.message);
+      } else {
+        res.json({
+          status: 200,
+          message: "Response from user get api",
+          data: result,
+        });
+      }
+    }
+  );
+});
 
 user.post("/login", (req, res) => { //login and 2FA process
   connection.execute(
@@ -362,47 +379,72 @@ user.post('/verify-code', (req, res) => {
   );
 });
 
-user.put("/change-info", (req, res) => {
+user.put('/change-info', async (req, res) => {
   const { email, firstName, lastName } = req.body;
 
-  // Check if all required fields are provided
-  if (!email || !firstName || !lastName) {
-    return res.status(400).json({ message: "Please provide all required fields: current email, new first name, and new last name." });
+  try {
+    const [result] = connection.execute(
+      'UPDATE userdata SET First_Name=?, Last_Name=? WHERE Email=?',
+      [firstName, lastName, email]
+    );
+    console.log("Update result:", result);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'Information updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
+});
 
-  // Step 1: Check if the provided email exists in the database
+
+user.post("/change-info", (req, res) => {
+  // Step 1: Select the user based on email
   connection.execute(
-    "SELECT * FROM userdata WHERE Email = ?",
-    [email],
-    (err, results) => {
+    "select * from userdata where email=?",
+    [req.body.email],
+    function (err, result) {
       if (err) {
-        return res.status(500).json({ message: "Database error", error: err.message });
-      }
-
-      if (results.length === 0) {
-        // If no user with the provided email is found
-        return res.status(404).json({ message: "No user found with the provided email." });
-      }
-      else {
-        // Step 2: Update the user's first name and last name if the email exists
+        res.json({
+          status: 500,
+          message: err.message,
+        });
+      } else if (result.length === 0) {
+        // User not found
+        res.json({
+          status: 404,
+          message: "User not found.",
+        });
+      } else {
+        // Step 4: Update the name in the database
         connection.execute(
-          "UPDATE userdata SET First_Name = ?, Last_Name = ? WHERE Email = ?",
-          [firstName, lastName, email],  // Ensure the WHERE clause matches the specific email
-          (updateErr, updateResult) => {
+          "update userdata set First_Name=?, Last_Name=? where email=?",
+          [req.body.firstName, req.body.lastName, req.body.email],
+          function (updateErr, updateResult) {
             if (updateErr) {
-              return res.status(500).json({ message: "Failed to update user information", error: updateErr.message });
-            }
-            if (updateResult.affectedRows === 0) {
-              return res.status(404).json({ message: "No user found with the provided email to update." });
-            }
-            else {
-              return res.status(200).json({ message: "User information updated successfully!" });
+              res.json({
+                status: 500,
+                message: updateErr.message,
+              });
+            } else {
+              // Step 5: Respond with success message
+              res.json({
+                status: 200,
+                message: "Name changed successfully.",
+                data: updateResult,
+              });
             }
           }
         );
       }
-    }
-  );
-});
+    });
+}
+
+
+);
+
 
 export default user;

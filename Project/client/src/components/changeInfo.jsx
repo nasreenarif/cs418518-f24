@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function ChangeInfo() {
-    const [email, setEmail] = useState(''); // New email input field
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
+    const [First_Name, setFirstName] = useState('');
+    const [Last_Name, setLastName] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    const email = JSON.parse(localStorage.getItem('storedEmail'));  //locally stored email
 
     const handleChangeInfo = async (event) => {
         event.preventDefault();
@@ -15,26 +16,28 @@ export default function ChangeInfo() {
         setError('');
 
         try {
+            console.log("first name, last name", First_Name + Last_Name);
             const response = await fetch('http://localhost:8080/user/change-info', {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email, // Email entered by the user
-                    firstName,
-                    lastName,
+                    email: email, //locally stored email
+                    firstName: First_Name,
+                    lastName: Last_Name,
                 }),
             });
+            console.log("Email used for change:", email);
 
             if (!response.ok) {
                 throw new Error('Failed to update user information');
             }
 
-            const result = await response.json();
+            /* const result = await response.json(); */
             setMessage('Information updated successfully!');
             setTimeout(() => {
-                navigate('/dashboard'); // Redirect to dashboard or profile page after success
+                navigate('/dashboard'); // Redirect to dashboard or after 2s
             }, 2000);
         } catch (error) {
             setError('Failed to update your information. Please try again.');
@@ -43,26 +46,14 @@ export default function ChangeInfo() {
 
     return (
         <div style={styles.container}>
-            <h2 style={styles.heading}>Change Account Info</h2>
+            <h2 style={styles.heading}>Changing Account Info for</h2>
             <form onSubmit={handleChangeInfo} style={styles.form}>
-                <div>
-                    <label htmlFor="email">Email:</label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        style={styles.input}
-                    />
-                </div>
-
                 <div>
                     <label htmlFor="firstName">New First Name:</label>
                     <input
                         type="text"
                         id="firstName"
-                        value={firstName}
+                        value={First_Name}
                         onChange={(e) => setFirstName(e.target.value)}
                         required
                         style={styles.input}
@@ -74,7 +65,7 @@ export default function ChangeInfo() {
                     <input
                         type="text"
                         id="lastName"
-                        value={lastName}
+                        value={Last_Name}    //actual database attribute name
                         onChange={(e) => setLastName(e.target.value)}
                         required
                         style={styles.input}
