@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Login() {
     const [enteredEmail, setEnteredEmail] = useState("");
+    const [displayEmail, setDisplayEmail] = useState("");
     const [enteredPassword, setEnteredPassword] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [Code2FA, setCode2FA] = useState("");
@@ -19,6 +20,7 @@ export default function Login() {
     function handleInputChange(identifier, value) {
         if (identifier === "email") {
             setEnteredEmail(value);
+            setDisplayEmail(value); //syncs display email with saved email
         } else if (identifier === "password") {
             setEnteredPassword(value);
         } else if (identifier === "Code2FA") {
@@ -64,14 +66,16 @@ export default function Login() {
                 else if (data.data.length > 0) {
 
                     setIs2FARequired(true); // Show the 2FA input field
+                    setDisplayEmail("");    //display email is now empty string
                     console.log('set 2FA required as TRUE');
                     setErrorMessage("A 2FA code has been sent to your email. Please enter it below.");
 
                     setErrorMessage('');    //clears error message
                     setUserStateVal(1);
 
-                    localStorage.setItem('storedEmail', JSON.stringify(enteredEmail));
-                    /* console.log("userStateVal = " + userStateVal); */
+                    //localStorage.setItem('storedEmail', JSON.stringify(enteredEmail));    //don't want to store it before 2FA passes
+
+                    console.log("userStateVal = " + userStateVal);
 
                     /* navigate('/dashboard');     //placed inside IF */
 
@@ -115,6 +119,7 @@ export default function Login() {
 
             if (response.ok) {
                 alert("Login successful");
+                localStorage.setItem('storedEmail', JSON.stringify(enteredEmail)); // Store email AFTER 2FA success
                 navigate('/dashboard');
             } else {
                 setErrorMessage(data.message || '2FA verification failed');

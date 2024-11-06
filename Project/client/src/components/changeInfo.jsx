@@ -46,7 +46,7 @@ export default function ChangeInfo() {
 
     return (
         <div style={styles.container}>
-            <h2 style={styles.heading}>Changing Account Info for</h2>
+            <h2 style={styles.heading}>Changing Personal Info for "{email}"</h2>
             <form onSubmit={handleChangeInfo} style={styles.form}>
                 <div>
                     <label htmlFor="firstName">New First Name:</label>

@@ -53,7 +53,7 @@ export default function ChangePassword() {
 
     return (
         <div style={styles.container}>
-            <h2>Change Password</h2>
+            <h2 style={styles.h2}>Password Change Form</h2>
             <form onSubmit={handleChangePassword} style={styles.form}>
                 <div>
                     <label htmlFor="email">Email:</label>
@@ -130,6 +130,11 @@ const styles = {
     heading: {
         marginBottom: '20px',
         fontSize: '24px',
+        fontWeight: 'bold',
+    },
+    h2: {
+        marginBottom: '10px',
+        fontSize: '20px',
         fontWeight: 'bold',
     },
     form: {

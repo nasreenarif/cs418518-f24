@@ -8,7 +8,10 @@ import ChangeInfo from "./components/changeInfo";
 import ForgotPassword from "./components/forgotPassword";
 import CreateAccount from "./components/createAccount";
 import VerifyCode from "./components/verifyCode";
-
+import CreateEntry from "./components/createEntry";
+import ViewEntries from "./components/viewEntries";
+/* import ApproveReject from "./components/approveReject";
+import EditPrereqs from "./components/editPrereqs"; */
 
 
 /* import Create from "./components/create";
@@ -28,7 +31,10 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/create-account" element={<CreateAccount />} />
       <Route path="/verify-code" element={<VerifyCode />} />
-
+      <Route path="/create-entry" element={<CreateEntry />} />
+      <Route path="/view-entries" element={<ViewEntries />} />
+      {/* <Route path="/approve-reject-entry" element={<ApproveReject />} />
+      <Route path="/edit-prereqs" element={<EditPrereqs />} /> */}
     </Routes>
 
 
