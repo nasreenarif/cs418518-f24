@@ -20,8 +20,9 @@ const myLogger = function (req, res, next) {
 app.use(myLogger);
 app.use(bodyParser.json());
 app.use(cors({
-    /* origin: "http://localhost:5173" */
-    origin: "*"   //swaps to remote deployment
+    origin: "http://localhost:5173"
+    //origin: "*"   
+    //swap between remote and local deployment
 }))
 app.use('/user', user);
 app.use('/prereqs', prereqs);

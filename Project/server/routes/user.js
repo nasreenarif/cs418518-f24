@@ -26,7 +26,7 @@ function generateRandomCode() {
 user.post("/", (req, res) => {  //create account process
   const { firstName, lastName, email, password } = req.body;
 
-  // Check if email already exists
+  //check if email already exists
   connection.execute(
     "SELECT * FROM userdata WHERE Email=?",
     [email],
@@ -36,11 +36,11 @@ user.post("/", (req, res) => {  //create account process
       }
 
       if (result.length > 0) {
-        // Email already exists
+        //email already exists
         return res.status(409).json({ message: "Email already exists" });
       }
 
-      // Create new account
+      //create new account
       const hashedPassword = HashedPassword(password);
       const verificationToken = crypto.randomBytes(32).toString("hex"); //generates unique token
 
@@ -52,7 +52,7 @@ user.post("/", (req, res) => {  //create account process
           if (err) {
             return res.status(500).json({ message: "Server error" });
           }
-
+          //swap between remote and local deployment
           const verificationLink = `http://localhost:8080/user/verify?token=${verificationToken}`;
           SendMail(email, "Archer Advising Email Verification", `Please verify your account by clicking this link: ${verificationLink}`);
 
@@ -74,7 +74,7 @@ user.get("/verify", async (req, res) => {
     return res.status(400).json({ message: "Verification token is missing" });
   }
 
-  // Check if the token exists in the database
+  //check if the token exists in the database
   connection.execute(
     "SELECT * FROM userdata WHERE verificationToken=?",
     [token],
@@ -89,10 +89,10 @@ user.get("/verify", async (req, res) => {
         return res.status(400).json({ message: "Invalid or expired verification link" });
       }
 
-      // Debugging log
+      //debugging
       console.log("Token found, updating isVerified status...");
 
-      // Update isVerified to 1 and remove the token to prevent reuse
+      //update isVerified to 1 and remove token to prevent reuse
       connection.execute(
         "UPDATE userdata SET isVerified=1, verificationToken=NULL WHERE verificationToken=?",
         [token],
@@ -183,7 +183,7 @@ user.post("/login", (req, res) => { //login and 2FA process
       } else if (result.length === 0) { //checks if user exists
         res.json({ status: 401, message: "Invalid credentials" });
       } else {
-        // Check if the user is verified
+        //check if user is verified
         if (result[0].isVerified === 0) {
           res.json({ status: 403, message: "Please verify your email before logging in." });
         } else {
@@ -195,9 +195,6 @@ user.post("/login", (req, res) => { //login and 2FA process
             const Code2FA = generateRandomCode(); //generate 2FA code
             const Code2FAExpires = Date.now() + 5 * 60 * 1000;  //create expiration of 2FA code
 
-            // SendMail(req.body.email,"Login Verification","Your login verification is 1234567")
-
-
             connection.execute(
               'UPDATE userdata SET Code2FA=?, Code2FAExpires=? WHERE email=?',
               [Code2FA, Code2FAExpires, req.body.email],
@@ -207,8 +204,8 @@ user.post("/login", (req, res) => { //login and 2FA process
                 }
 
 
-                // Send the 2FA code by email
-                SendMail(req.body.email, 'Your 2FA Code', `Your 2FA code is: ${Code2FA}`);
+                //send the 2FA code by email
+                SendMail(req.body.email, 'Archer Advising 2FA Code', `Your 2FA code is: ${Code2FA}`);
                 /* res.status(200).json({ message: '2FA code sent to your email' }); */
               }
             );
@@ -228,7 +225,7 @@ user.post("/login", (req, res) => { //login and 2FA process
 });
 
 user.post("/change-password", (req, res) => {
-  // Step 1: Select the user based on email
+  //select the user based on email
   connection.execute(
     "select * from userdata where email=?",
     [req.body.email],
@@ -239,19 +236,19 @@ user.post("/change-password", (req, res) => {
           message: err.message,
         });
       } else if (result.length === 0) {
-        // User not found
+        //user not found
         res.json({
           status: 404,
           message: "User not found.",
         });
       } else {
-        // Step 2: Verify the current password
+        //verify current password
         const user = result[0];
         if (ComparePassword(req.body.currentPassword, user.Password)) {
-          // Step 3: Hash the new password
+          //hash new password
           const newHashedPassword = HashedPassword(req.body.newPassword);
 
-          // Step 4: Update the password in the database
+          //update password in the database
           connection.execute(
             "update userdata set Password=? where email=?",
             [newHashedPassword, req.body.email],
@@ -262,7 +259,7 @@ user.post("/change-password", (req, res) => {
                   message: updateErr.message,
                 });
               } else {
-                // Step 5: Respond with success message
+                //respond with success message
                 res.json({
                   status: 200,
                   message: "Password changed successfully.",
@@ -272,7 +269,7 @@ user.post("/change-password", (req, res) => {
             }
           );
         } else {
-          // Invalid current password
+          //invalid current password
           res.json({
             status: 401,
             message: "Invalid current password.",
@@ -286,7 +283,7 @@ user.post("/change-password", (req, res) => {
 user.post("/forgot-password", (req, res) => {
   const { email } = req.body;
 
-  // Check if the email exists
+  //check if email exists
   connection.execute("SELECT * FROM userdata WHERE email=?", [email], (err, result) => {
     if (err) {
       return res.status(500).json({ message: "Error retrieving user" });
@@ -297,11 +294,11 @@ user.post("/forgot-password", (req, res) => {
 
     const user = result[0];
 
-    // Generate a random temporary password
-    const tempPassword = generateTempPassword(12);  // Generates a 12-character password
-    const hashedTempPassword = HashedPassword(tempPassword);  // Hash the temporary password
+    //generate random temporary password
+    const tempPassword = generateTempPassword(12);  //generate 12-character password
+    const hashedTempPassword = HashedPassword(tempPassword);  //hash the temporary password
 
-    // Update the user's password in the database with the hashed temporary password
+    //update user's password in the database with hashed temporary password
     connection.execute(
       "UPDATE userdata SET Password=? WHERE email=?",
       [hashedTempPassword, email],
@@ -310,7 +307,7 @@ user.post("/forgot-password", (req, res) => {
           return res.status(500).json({ message: "Error updating password" });
         }
 
-        // Send the temporary password to the user's email
+        //send temporary password to user's email
         SendMail(email, "Temporary Password", `Your new temporary password is: ${tempPassword}`);
 
         return res.status(200).json({ message: "Password reset link has been sent to your email." });
@@ -332,7 +329,7 @@ user.post('/verify-code', (req, res) => {
 
       const user = result[0];
 
-      // Check if 2FA code is valid and not expired
+      //check if 2FA code is valid and not expired
       if (user.Code2FA !== parseInt(Code2FA, 10)) {
         return res.status(401).json({ message: 'Invalid 2FA code' });
       }
@@ -341,7 +338,7 @@ user.post('/verify-code', (req, res) => {
         return res.status(401).json({ message: '2FA code expired' });
       }
 
-      // Clear the 2FA code after successful verification
+      //clear the 2FA code after successful verification
       connection.execute(
         'UPDATE userdata SET Code2FA=NULL, Code2FAExpires=NULL WHERE email=?',
         [email],
@@ -378,7 +375,7 @@ user.put('/change-info', async (req, res) => {
 
 
 user.post("/change-info", (req, res) => {
-  // Step 1: Select the user based on email
+  //select the user based on email
   connection.execute(
     "select * from userdata where email=?",
     [req.body.email],
@@ -389,13 +386,13 @@ user.post("/change-info", (req, res) => {
           message: err.message,
         });
       } else if (result.length === 0) {
-        // User not found
+        //if user not found
         res.json({
           status: 404,
           message: "User not found.",
         });
       } else {
-        // Step 4: Update the name in the database
+        //update the name in database
         connection.execute(
           "update userdata set First_Name=?, Last_Name=? where email=?",
           [req.body.firstName, req.body.lastName, req.body.email],
@@ -406,7 +403,7 @@ user.post("/change-info", (req, res) => {
                 message: updateErr.message,
               });
             } else {
-              // Step 5: Respond with success message
+              //respond with success message
               res.json({
                 status: 200,
                 message: "Name changed successfully.",
