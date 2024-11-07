@@ -61,8 +61,8 @@ export default function CreateEntry() {
                     lastTerm,
                     lastGPA,
                     currentTerm,
-                    selectedItems1: selectedItemsPrereqs, // Array of selected items from dropdowns
-                    selectedItems2: selectedItemsCourses,
+                    selectedItems1: selectedItemsPrereqs, // Array of selected prereqs from dropdowns
+                    selectedItems2: selectedItemsCourses,// Array of selected planned courses
                 }),
             });
 

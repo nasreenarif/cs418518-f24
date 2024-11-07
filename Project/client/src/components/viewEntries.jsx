@@ -17,7 +17,9 @@ export default function ViewEntries() {
     useEffect(() => {
         async function fetchEntries() {
             try {
-                const response = await fetch(isAdmin ? `http://localhost:8080/records` : `http://localhost:8080/records?email=${email}`);
+                const response = await fetch(
+                    isAdmin ? `http://localhost:8080/records` : `http://localhost:8080/records?email=${email}`
+                );
                 const data = await response.json();
 
                 if (!response.ok) {

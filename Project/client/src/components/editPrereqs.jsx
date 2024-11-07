@@ -12,20 +12,19 @@ export default function CourseCatalog() {
         async function fetchCourses() {
             try {
                 const response = await fetch('http://localhost:8080/courses/list');
-                const data = await response.json();
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch courses');
                 }
 
-                console.log("Data fetched:", data);
-                setCourses(data.data);
+                const data = await response.json();  // Parse JSON from the response
+                setCourses(data);  // Directly set `data`, assuming `data` is an array of courses
+
             } catch (error) {
                 console.error('Error fetching courses:', error);
                 setError('Failed to load courses. Please try again later.');
             }
         }
-
         fetchCourses();
     }, []);
 
