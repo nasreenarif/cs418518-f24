@@ -4,9 +4,9 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
 import user from "./routes/user.js";
-import prereqs from "./routes/user.js";
+import prereqs from "./routes/prereqs.js";
 import courses from "./routes/courses.js";
-import records from "./routes/user.js";
+import records from "./routes/records.js";
 
 const app = express();
 const port = 8080;

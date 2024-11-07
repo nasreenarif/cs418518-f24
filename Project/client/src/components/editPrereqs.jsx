@@ -7,7 +7,6 @@ export default function CourseCatalog() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-
     // Fetch all courses from the courseCatalog database
     useEffect(() => {
         async function fetchCourses() {
@@ -19,9 +18,8 @@ export default function CourseCatalog() {
                     throw new Error('Failed to fetch courses');
                 }
 
-                console.log("Data fetched:", data); // Log the fetched data
+                console.log("Data fetched:", data);
                 setCourses(data.data);
-
             } catch (error) {
                 console.error('Error fetching courses:', error);
                 setError('Failed to load courses. Please try again later.');
@@ -31,7 +29,6 @@ export default function CourseCatalog() {
         fetchCourses();
     }, []);
 
-
     const handleCheckboxChange = (courseID, type) => {
         setSelectedPrerequisites((prev) => ({
             ...prev,
@@ -39,15 +36,7 @@ export default function CourseCatalog() {
         }));
     };
 
-    /* // Handle checkbox change
-    const handleCheckboxChange = (courseId, type) => {
-        setSelectedPrerequisites((prev) => ({
-            ...prev,
-            [courseId]: type === 'prerequisite' ? 'prerequisite' : 'course'
-        }));
-    }; */
-
-    //handle submit, saves prerequisites to prereqCatalog
+    // Handle submit to add or delete courses from prereqCatalog
     const handleSubmit = async () => {
         const prerequisitesToAdd = Object.entries(selectedPrerequisites)
             .filter(([_, type]) => type === 'prerequisite')
@@ -87,32 +76,6 @@ export default function CourseCatalog() {
         }
     };
 
-    /* // Handle submit to save prerequisites to prereqcatalog
-    const handleSubmit = async () => {
-        const prerequisites = Object.entries(selectedPrerequisites)
-            .filter(([_, type]) => type === 'prerequisite')
-            .map(([courseId]) => courses.find((course) => course.courseID === courseId));
-
-        try {
-            const response = await fetch('http://localhost:8080/prereqs', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(prerequisites),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to submit prerequisites');
-            }
-
-            alert('Prerequisites submitted successfully');
-        } catch (error) {
-            console.error('Error submitting prerequisites:', error);
-            setError('Failed to submit prerequisites. Please try again later.');
-        }
-    }; */
-
     return (
         <div style={styles.container}>
             <h2 style={styles.heading}>Course Catalog</h2>
@@ -143,7 +106,7 @@ export default function CourseCatalog() {
                                         checked={selectedPrerequisites[course.courseID] === 'course'}
                                         onChange={() => handleCheckboxChange(course.courseID, 'course')}
                                     />
-                                    Course
+                                    NOT Prereq
                                 </label>
                                 <label style={{ marginLeft: '10px' }}>
                                     <input
@@ -151,7 +114,7 @@ export default function CourseCatalog() {
                                         checked={selectedPrerequisites[course.courseID] === 'prerequisite'}
                                         onChange={() => handleCheckboxChange(course.courseID, 'prerequisite')}
                                     />
-                                    Prerequisite
+                                    Prerequisite Course
                                 </label>
                             </td>
                         </tr>
@@ -171,6 +134,7 @@ export default function CourseCatalog() {
     );
 }
 
+// Styles
 const styles = {
     container: {
         backgroundColor: 'white',
