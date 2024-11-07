@@ -7,18 +7,21 @@ export default function CourseCatalog() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+
     // Fetch all courses from the courseCatalog database
     useEffect(() => {
         async function fetchCourses() {
             try {
-                const response = await fetch('http://localhost:8080/courseCatalog');
+                const response = await fetch('http://localhost:8080/courses/list');
                 const data = await response.json();
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch courses');
                 }
 
-                setCourses(data);
+                console.log("Data fetched:", data); // Log the fetched data
+                setCourses(data.data);
+
             } catch (error) {
                 console.error('Error fetching courses:', error);
                 setError('Failed to load courses. Please try again later.');
@@ -28,22 +31,70 @@ export default function CourseCatalog() {
         fetchCourses();
     }, []);
 
-    // Handle checkbox change
+
+    const handleCheckboxChange = (courseID, type) => {
+        setSelectedPrerequisites((prev) => ({
+            ...prev,
+            [courseID]: type
+        }));
+    };
+
+    /* // Handle checkbox change
     const handleCheckboxChange = (courseId, type) => {
         setSelectedPrerequisites((prev) => ({
             ...prev,
             [courseId]: type === 'prerequisite' ? 'prerequisite' : 'course'
         }));
+    }; */
+
+    //handle submit, saves prerequisites to prereqCatalog
+    const handleSubmit = async () => {
+        const prerequisitesToAdd = Object.entries(selectedPrerequisites)
+            .filter(([_, type]) => type === 'prerequisite')
+            .map(([courseID]) => ({ courseID }));
+
+        const prerequisitesToDelete = Object.entries(selectedPrerequisites)
+            .filter(([_, type]) => type === 'course')
+            .map(([courseID]) => ({ courseID }));
+
+        try {
+            // Add new prerequisites to prereqCatalog
+            if (prerequisitesToAdd.length > 0) {
+                await fetch('http://localhost:8080/prereqs/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(prerequisitesToAdd),
+                });
+            }
+
+            // Delete courses from prereqCatalog
+            if (prerequisitesToDelete.length > 0) {
+                await fetch('http://localhost:8080/prereqs/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(prerequisitesToDelete),
+                });
+            }
+
+            alert('Prerequisites updated successfully');
+        } catch (error) {
+            console.error('Error updating prerequisites:', error);
+            setError('Failed to update prerequisites. Please try again later.');
+        }
     };
 
-    // Handle submit to save prerequisites to prereqCatalog
+    /* // Handle submit to save prerequisites to prereqcatalog
     const handleSubmit = async () => {
         const prerequisites = Object.entries(selectedPrerequisites)
             .filter(([_, type]) => type === 'prerequisite')
-            .map(([courseId]) => courses.find((course) => course.id === courseId));
+            .map(([courseId]) => courses.find((course) => course.courseID === courseId));
 
         try {
-            const response = await fetch('http://localhost:8080/prereqCatalog', {
+            const response = await fetch('http://localhost:8080/prereqs', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -60,7 +111,7 @@ export default function CourseCatalog() {
             console.error('Error submitting prerequisites:', error);
             setError('Failed to submit prerequisites. Please try again later.');
         }
-    };
+    }; */
 
     return (
         <div style={styles.container}>
@@ -80,7 +131,7 @@ export default function CourseCatalog() {
                 </thead>
                 <tbody>
                     {courses.map((course) => (
-                        <tr key={course.id}>
+                        <tr key={course.courseID}>
                             <td style={styles.td}>{course.courseID}</td>
                             <td style={styles.td}>{course.courseLevel}</td>
                             <td style={styles.td}>{course.courseCode}</td>
@@ -89,16 +140,16 @@ export default function CourseCatalog() {
                                 <label>
                                     <input
                                         type="checkbox"
-                                        checked={selectedPrerequisites[course.id] === 'course'}
-                                        onChange={() => handleCheckboxChange(course.id, 'course')}
+                                        checked={selectedPrerequisites[course.courseID] === 'course'}
+                                        onChange={() => handleCheckboxChange(course.courseID, 'course')}
                                     />
                                     Course
                                 </label>
                                 <label style={{ marginLeft: '10px' }}>
                                     <input
                                         type="checkbox"
-                                        checked={selectedPrerequisites[course.id] === 'prerequisite'}
-                                        onChange={() => handleCheckboxChange(course.id, 'prerequisite')}
+                                        checked={selectedPrerequisites[course.courseID] === 'prerequisite'}
+                                        onChange={() => handleCheckboxChange(course.courseID, 'prerequisite')}
                                     />
                                     Prerequisite
                                 </label>

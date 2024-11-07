@@ -7,6 +7,7 @@ import * as crypto from "crypto"; //generates tokens
 
 const user = Router();
 
+
 function generateTempPassword(length = 12) {    //forgot password
   const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+<>?";
   let password = "";
@@ -20,6 +21,7 @@ function generateTempPassword(length = 12) {    //forgot password
 function generateRandomCode() {
   return Math.floor(100000 + Math.random() * 900000); //generate 6-digit code
 }
+
 
 user.post("/", (req, res) => {  //create account process
   const { firstName, lastName, email, password } = req.body;
@@ -113,38 +115,6 @@ user.get("/verify", async (req, res) => {
   );
 });
 
-//older user.get methods
-/* user.get("/", (req, res) => {
-  connection.execute("select * from userdata", function (err, result) {
-    if (err) {
-      res.json(err.message);
-    } else {
-      res.json({
-        status: 200,
-        message: "Response from user get api",
-        data: result,
-      });
-    }
-  });
-});
-
-user.get("/:id", (req, res) => {
-  connection.execute(
-    "select * from userdata where id=?",
-    [req.params.id],
-    function (err, result) {
-      if (err) {
-        res.json(err.message);
-      } else {
-        res.json({
-          status: 200,
-          message: "Response from user get api",
-          data: result,
-        });
-      }
-    }
-  );
-}); */
 
 user.delete("/:id", (req, res) => {
   connection.execute(
@@ -225,7 +195,7 @@ user.post("/login", (req, res) => { //login and 2FA process
             const Code2FA = generateRandomCode(); //generate 2FA code
             const Code2FAExpires = Date.now() + 5 * 60 * 1000;  //create expiration of 2FA code
 
-          // SendMail(req.body.email,"Login Verification","Your login verification is 1234567")
+            // SendMail(req.body.email,"Login Verification","Your login verification is 1234567")
 
 
             connection.execute(

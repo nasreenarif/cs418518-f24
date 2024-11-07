@@ -55,7 +55,7 @@ export default function ViewEntries() {
 
     const handleSubmitChanges = async () => {
         try {
-            const response = await fetch('http://localhost:8080/records/update-status', {
+            const response = await fetch('http://localhost:8080/records', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
