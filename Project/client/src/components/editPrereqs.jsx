@@ -89,7 +89,7 @@ export default function CourseCatalog() {
                         <th style={styles.th}>Course Level</th>
                         <th style={styles.th}>Course Code</th>
                         <th style={styles.th}>Course Name</th>
-                        <th style={styles.th}>Type</th>
+                        <th style={styles.th}>Prerequisites List:</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -106,7 +106,7 @@ export default function CourseCatalog() {
                                         checked={selectedPrerequisites[course.courseID] === 'course'}
                                         onChange={() => handleCheckboxChange(course.courseID, 'course')}
                                     />
-                                    NOT Prereq
+                                    Remove From
                                 </label>
                                 <label style={{ marginLeft: '10px' }}>
                                     <input
@@ -114,7 +114,7 @@ export default function CourseCatalog() {
                                         checked={selectedPrerequisites[course.courseID] === 'prerequisite'}
                                         onChange={() => handleCheckboxChange(course.courseID, 'prerequisite')}
                                     />
-                                    Prerequisite Course
+                                    Add To
                                 </label>
                             </td>
                         </tr>

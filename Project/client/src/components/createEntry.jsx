@@ -10,22 +10,39 @@ export default function CreateEntry() {
     const [dropdownOptions, setDropdownOptions] = useState([]); // Options from the database
     const [selectedItemsPrereqs, setSelectedItemsPrereqs] = useState(['']); // Array to hold each dropdown's selected value
     const [selectedItemsCourses, setSelectedItemsCourses] = useState(['']); // Array to hold each dropdown's selected value
+    const [courseOptions, setCourseOptions] = useState([]);  // Options for the "Course Plan" dropdown
+    const [prereqOptions, setPrereqOptions] = useState([]);  // Options for the "Prerequisites" dropdown
     const navigate = useNavigate();
 
     const email = JSON.parse(localStorage.getItem('storedEmail'));  // Get stored email
 
     useEffect(() => {
-        async function fetchOptions() {
+        async function fetchDropdownOptions() {
             try {
-                const response = await fetch('http://localhost:8080/items');    //change SQL call
-                const data = await response.json();
-                setDropdownOptions(data); // Set options from the response
+                // Fetch course options
+                const courseResponse = await fetch('http://localhost:8080/courses/droplist');
+                const courseData = await courseResponse.json();
+
+                if (!courseResponse.ok) {
+                    throw new Error('Failed to fetch course options');
+                }
+                setCourseOptions(courseData);
+
+                // Fetch prerequisite options
+                const prereqResponse = await fetch('http://localhost:8080/prereqs/list');
+                const prereqData = await prereqResponse.json();
+
+                if (!prereqResponse.ok) {
+                    throw new Error('Failed to fetch prerequisite options');
+                }
+                setPrereqOptions(prereqData);
+
             } catch (error) {
-                console.error('Error fetching dropdown course selection:', error);
-                setError('Failed to load courses.');
+                console.error('Error fetching dropdown options:', error);
+                setError('Failed to load options.');
             }
         }
-        fetchOptions();
+        fetchDropdownOptions();
     }, []);
 
     const handleCreateEntry = async (event) => {
@@ -128,14 +145,15 @@ export default function CreateEntry() {
                             style={styles.select}
                         >
                             <option value="" disabled>Prerequisite Courses</option>
-                            {dropdownOptions.map((option) => (
-                                <option key={option.id} value={option.id}>
-                                    {option.name}
+                            {prereqOptions.map((option) => (
+                                <option key={option.preCourseCode} value={option.preCourseCode}>
+                                    {option.preCourseName}
                                 </option>
                             ))}
                         </select>
                     ))}
                 </div>
+
                 {/*button to add new prereq*/}
                 <button type="button" onClick={handleAddDropdown1} style={styles.addButton}>
                     Add Prerequisite Course
@@ -154,17 +172,18 @@ export default function CreateEntry() {
                             style={styles.select}
                         >
                             <option value="" disabled>Planned Courses</option>
-                            {dropdownOptions.map((option) => (
-                                <option key={option.id} value={option.id}>
-                                    {option.name}
+                            {courseOptions.map((option) => (
+                                <option key={option.courseCode} value={option.courseCode}>
+                                    {option.courseName}
                                 </option>
                             ))}
                         </select>
                     ))}
                 </div>
+
                 {/*button to add new course*/}
                 <button type="button" onClick={handleAddDropdown2} style={styles.addButton}>
-                    Add Another Course
+                    Add Planned Course
                 </button>
 
 

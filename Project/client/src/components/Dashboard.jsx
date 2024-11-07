@@ -87,7 +87,11 @@ export default function Dashboard() {
                 <p style={{ color: 'black' }}>
                     At Archer Advising, we provide guidance to help you achieve your academic and career goals. Whether you're
                     a first-year student or preparing to graduate, our portal is here to support you every step of the way.
-                </p>
+                </p><p>. </p>
+            </section>
+
+            <section id="advising" style={styles.aboutSection}>
+                <h3 style={styles.headerThree}>Advising</h3>
             </section>
 
             <section style={styles.advisingSection}>
@@ -216,5 +220,3 @@ const styles = {
         textAlign: 'center', // Centers image horizontally if it's an inline element
     },
 };
-
-

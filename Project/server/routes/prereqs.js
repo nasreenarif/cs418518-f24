@@ -7,21 +7,40 @@ import * as crypto from "crypto"; //generates tokens
 
 const prereqs = Router();
 
-prereqs.get("/list", (req, res) => {
-    connection.execute(
-        'SELECT * from prereqcatalog',
 
-        function (err, result) {
-            if (err) {
-                res.json(err.message);
-            } else {
-                res.json({
-                    data: result,
-                });
-            }
-        }
-    );
+prereqs.get('/list', async (req, res) => {
+    try {
+        const [rows] = await connection.execute('SELECT preCourseCode, preCourseName FROM prereqcatalog');
+        console.log('Fetched rows:', rows);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error('Error fetching prerequisites:', error);
+        res.status(500).json({ message: 'Failed to fetch prerequisites' });
+    }
 });
+
+/* prereqs.get('/list', async (req, res) => {
+    try {
+        // Await the result of the query
+        const result = await connection.execute('SELECT preCourseCode, preCourseName FROM prereqcatalog');
+
+        // Log the type and structure of result to see if it matches expectations
+        console.log('Type of result:', typeof result);
+        console.log('Query Result:', result);
+
+        // Ensure the result is an array and destructure if so
+        if (Array.isArray(result)) {
+            const [rows] = result; // rows should contain the data we need
+            res.status(200).json(rows);
+        } else {
+            throw new Error('Unexpected query result format');
+        }
+    } catch (error) {
+        console.error('Error fetching prerequisites:', error);
+        res.status(500).json({ message: 'Failed to fetch prerequisites' });
+    }
+}); */
+
 
 prereqs.post('/add', async (req, res) => {
     const prerequisites = req.body; // Array of courses to add as prerequisites

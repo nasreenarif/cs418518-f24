@@ -23,6 +23,17 @@ courses.get("/list", (req, res) => {
     );
 });
 
+courses.get('/droplist', async (req, res) => {
+    try {
+        const [rows] = await connection.execute('SELECT courseCode, courseName FROM coursecatalog');
+        console.log('Fetched rows:', rows);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error('Error fetching prerequisites:', error);
+        res.status(500).json({ message: 'Failed to fetch prerequisites' });
+    }
+});
+
 // Endpoint to save prerequisites to prereqCatalog
 courses.post('/prereqs', (req, res) => {
     const prerequisites = req.body;
