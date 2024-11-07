@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import { connection } from "../database/database.js";
 
@@ -8,7 +7,7 @@ import * as crypto from "crypto"; //generates tokens
 
 const courses = Router();
 
-/* courses.get("/list", (req, res) => {
+courses.get("/list", (req, res) => {
     connection.execute(
         'SELECT * from coursecatalog',
 
@@ -22,16 +21,6 @@ const courses = Router();
             }
         }
     );
-}); */
-
-courses.get('/list', async (req, res) => {
-    try {
-        const [rows] = await connection.execute('SELECT courseID, courseLevel, courseCode, courseName FROM coursecatalog');
-        res.status(200).json(rows);  // Send the results as JSON
-    } catch (error) {
-        console.error('Error fetching courses:', error);
-        res.status(500).json({ message: 'Failed to fetch courses' });
-    }
 });
 
 courses.get('/droplist', async (req, res) => {
