@@ -42,7 +42,8 @@ export default function Dashboard() {
                 <h1 style={styles.headerTitle}>Archer Advising Portal</h1>
                 <div>
                     {enteredEmail === adminEmail ? (
-                        <p>Welcome to the Administrator Panel, {enteredEmail}</p>
+                        /* <p>Welcome to the Administrator Panel, {enteredEmail}</p> */
+                        <p>Welcome to the Administrator Panel</p>
                     ) : (
                         <p>Welcome, {enteredEmail}</p>
                     )}
@@ -115,9 +116,16 @@ export default function Dashboard() {
                 </a>
             </section>
             <section style={styles.passwordSection}>
-                <a href="/change-info" style={styles.button}>
-                    Change Info
-                </a>
+                {enteredEmail === adminEmail ? (
+                    <a style={styles.button}>
+                        (Administrator must change <br></br>information through backend)
+                    </a>
+                ) : (
+                    <a href="/change-info" style={styles.button}>
+                        Change Info
+                    </a>
+                )}
+
             </section>
         </div >
     );
