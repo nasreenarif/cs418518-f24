@@ -7,11 +7,10 @@ import * as crypto from "crypto"; //generates tokens
 
 const courses = Router();
 
-// Assuming you have already imported and initialized your MySQL connection with `mysql2/promise`
 courses.get('/list', async (req, res) => {
     try {
         // Use `await` instead of a callback function
-        const [rows] = await connection.execute('SELECT * FROM courseCatalog');
+        const [rows] = await connection.execute('SELECT * FROM coursecatalog');
         res.status(200).json({ data: rows });
     } catch (error) {
         console.error('Error fetching courses:', error);
@@ -19,23 +18,6 @@ courses.get('/list', async (req, res) => {
     }
 });
 
-
-/* courses.get("/list", (req, res) => {
-    connection.execute(
-        'SELECT * from coursecatalog',
-
-        function (err, result) {
-            if (err) {
-                res.json(err.message);
-            } else {
-                res.json({
-                    data: result,
-                });
-            }
-        }
-    );
-});
- */
 courses.get('/droplist', async (req, res) => {
     try {
         const [rows] = await connection.execute('SELECT courseCode, courseName FROM coursecatalog');

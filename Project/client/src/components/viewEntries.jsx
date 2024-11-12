@@ -6,11 +6,12 @@ export default function ViewEntries() {
     const [error, setError] = useState('');
     const [expandedEntry, setExpandedEntry] = useState(null); // Track expanded entry
     const [updatedEntries, setUpdatedEntries] = useState({}); // Tracks selected status per entry
+    const [modalData, setModalData] = useState(null); // For modal content
+    const [isModalOpen, setIsModalOpen] = useState(false); // Control modal visibility
     const navigate = useNavigate();
 
-    // Get the user's stored email
+    //get user's stored email
     const email = JSON.parse(localStorage.getItem('storedEmail'));
-
     const isAdmin = (email === "great.gavin0@gmail.com");
 
     // Fetch entries from the database that match the user's email
@@ -38,20 +39,67 @@ export default function ViewEntries() {
         setExpandedEntry(expandedEntry === id ? null : id); //collapse if already expanded
     };
 
-    // Handle checkbox selection and text entry for each entry
-    const handleStatusChange = (id, status) => {
-        setUpdatedEntries({
-            ...updatedEntries,
-            [id]: { ...updatedEntries[id], status, rejectReason: '' },
-        });
+    // Fetch student data and open modal
+    const handleStudentEmailClick = async (studentEmail) => {
+        try {
+            //updated to RECORDS/student-info
+            const response = await fetch(`http://localhost:8080/records/student-info?email=${studentEmail}`);
+            const data = await response.json();
+            if (!response.ok) throw new Error('Failed to fetch student info');
+            setModalData({ ...data, studentEmail }); // Set modal content
+            setIsModalOpen(true); // Open modal
+        } catch (error) {
+            console.error('Error fetching student info:', error);
+            setError('Failed to load student information.');
+        }
     };
 
-    const handleRejectReasonChange = (id, reason) => {
-        setUpdatedEntries({
-            ...updatedEntries,
-            [id]: { ...updatedEntries[id], rejectReason: reason },
-        });
+    // Close the modal
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setModalData(null);
     };
+
+    /* // Handle checkbox selection for Accept and Reject for each specific entry
+    const handleStatusChange = (advisingID, status) => {
+        setUpdatedEntries((prevEntries) => ({
+            ...prevEntries,
+            [advisingID]: { ...prevEntries[advisingID], status } // Update only the specific entry's status
+        }));
+    };
+
+    // Handle text entry for the Reject Reason
+    const handleRejectReasonChange = (advisingID, reason) => {
+        setUpdatedEntries((prevEntries) => ({
+            ...prevEntries,
+            [advisingID]: { ...prevEntries[advisingID], rejectReason: reason }
+        }));
+    }; */
+
+    // Handle Accept checkbox selection
+    const handleAcceptChange = (advisingID) => {
+        setUpdatedEntries((prevEntries) => ({
+            ...prevEntries,
+            [advisingID]: { ...prevEntries[advisingID], status: 'accepted', rejectReason: '' } // Clear rejectReason when accepted
+        }));
+    };
+
+    // Handle Reject checkbox selection
+    const handleRejectChange = (advisingID) => {
+        setUpdatedEntries((prevEntries) => ({
+            ...prevEntries,
+            [advisingID]: { ...prevEntries[advisingID], status: 'rejected' } // Only set status to rejected, preserve rejectReason
+        }));
+    };
+
+    // Handle text entry for the Reject Reason
+    const handleRejectReasonChange = (advisingID, reason) => {
+        setUpdatedEntries((prevEntries) => ({
+            ...prevEntries,
+            [advisingID]: { ...prevEntries[advisingID], rejectReason: reason }
+        }));
+    };
+
 
     const handleSubmitChanges = async () => {
         try {
@@ -96,102 +144,48 @@ export default function ViewEntries() {
                 </thead>
                 <tbody>
                     {entries.map((entry) => (
-                        <React.Fragment key={entry.id}>
+                        <React.Fragment key={entry.advisingID}>
                             <tr>
                                 <td style={styles.td}>
-                                    <span onClick={() => toggleExpandedView(entry.id)} style={{ cursor: 'pointer', color: '#00539C' }}>
-                                        {entry.email}
+                                    <span
+                                        onClick={() => handleStudentEmailClick(entry.studentEmail)}
+                                        style={{ cursor: 'pointer', color: '#00539C' }}
+                                    >
+                                        {entry.studentEmail}
                                     </span>
                                 </td>
                                 <td style={styles.td}>{new Date(entry.dateSubmitted).toLocaleDateString()}</td>
-                                <td style={styles.td}>{entry.term}</td>
+                                <td style={styles.td}>{entry.currentTerm}</td>
                                 <td style={styles.td}>{entry.status}</td>
                                 {isAdmin && (
                                     <td style={styles.td}>
                                         <label>
                                             <input
                                                 type="checkbox"
-                                                checked={updatedEntries[entry.id]?.status === 'accepted'}
-                                                onChange={() => handleStatusChange(entry.id, 'accepted')}
+                                                checked={updatedEntries[entry.advisingID]?.status === 'accepted'}
+                                                onChange={() => handleAcceptChange(entry.advisingID)}
                                             />
                                             Accept
                                         </label>
                                         <label style={{ marginLeft: '10px' }}>
                                             <input
                                                 type="checkbox"
-                                                checked={updatedEntries[entry.id]?.status === 'rejected'}
-                                                onChange={() => handleStatusChange(entry.id, 'rejected')}
+                                                checked={updatedEntries[entry.advisingID]?.status === 'rejected'}
+                                                onChange={() => handleRejectChange(entry.advisingID)}
                                             />
                                             Reject
                                         </label>
                                         <input
                                             type="text"
                                             placeholder="Reject Reason"
-                                            value={updatedEntries[entry.id]?.rejectReason || ''}
-                                            onChange={(e) => handleRejectReasonChange(entry.id, e.target.value)}
-                                            disabled={updatedEntries[entry.id]?.status !== 'rejected'}
+                                            value={updatedEntries[entry.advisingID]?.rejectReason || ''}
+                                            onChange={(e) => handleRejectReasonChange(entry.advisingID, e.target.value)}
+                                            disabled={updatedEntries[entry.advisingID]?.status !== 'rejected'}
                                             style={styles.rejectInput}
                                         />
                                     </td>
                                 )}
                             </tr>
-                            {expandedEntry === entry.id && (
-                                <tr>
-                                    <td colSpan={isAdmin ? 5 : 4} style={styles.expandedRow}>
-                                        <div style={styles.details}>
-                                            <p><strong>First Name:</strong> {entry.firstName}</p>
-                                            <p><strong>Last Name:</strong> {entry.lastName}</p>
-                                            <p><strong>Last Term:</strong> {entry.lastTerm}</p>
-                                            <p><strong>Last GPA:</strong> {entry.lastGPA}</p>
-                                            <p><strong>Current Term:</strong> {entry.currentTerm}</p>
-
-                                            <h4>Prerequisite Courses</h4>
-                                            <table style={styles.innerTable}>
-                                                <thead>
-                                                    <tr>
-                                                        <th style={styles.th}>Course ID</th>
-                                                        <th style={styles.th}>Course Level</th>
-                                                        <th style={styles.th}>Course Code</th>
-                                                        <th style={styles.th}>Course Name</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {entry.prerequisiteCourses.map((course) => (
-                                                        <tr key={course.courseID}>
-                                                            <td style={styles.td}>{course.courseID}</td>
-                                                            <td style={styles.td}>{course.courseLevel}</td>
-                                                            <td style={styles.td}>{course.courseCode}</td>
-                                                            <td style={styles.td}>{course.courseName}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-
-                                            <h4>All Other Courses</h4>
-                                            <table style={styles.innerTable}>
-                                                <thead>
-                                                    <tr>
-                                                        <th style={styles.th}>Course ID</th>
-                                                        <th style={styles.th}>Course Level</th>
-                                                        <th style={styles.th}>Course Code</th>
-                                                        <th style={styles.th}>Course Name</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {entry.otherCourses.map((course) => (
-                                                        <tr key={course.courseID}>
-                                                            <td style={styles.td}>{course.courseID}</td>
-                                                            <td style={styles.td}>{course.courseLevel}</td>
-                                                            <td style={styles.td}>{course.courseCode}</td>
-                                                            <td style={styles.td}>{course.courseName}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
                         </React.Fragment>
                     ))}
                 </tbody>
@@ -207,6 +201,20 @@ export default function ViewEntries() {
                     </button>
                 )}
             </div>
+
+            {/* Modal for Student Information */}
+            {isModalOpen && modalData && (
+                <div style={styles.modal}>
+                    <div style={styles.modalContent}>
+                        <h3>Student Info for {modalData.studentEmail}</h3>
+                        <p style={{ color: 'black' }}><strong>First Name:</strong> {modalData.firstName}</p>
+                        <p style={{ color: 'black' }}><strong>Last Name:</strong> {modalData.lastName}</p>
+                        <p style={{ color: 'black' }}><strong>Last Term:</strong> {modalData.lastTerm}</p>
+                        <p style={{ color: 'black' }}><strong>Last GPA:</strong> {modalData.lastGPA}</p>
+                        <button onClick={closeModal} style={styles.closeButton}>Close</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -261,7 +269,7 @@ const styles = {
     rejectInput: {
         marginLeft: '10px',
         padding: '5px',
-        width: '100px',
+        width: '160px',
     },
     buttonContainer: {
         display: 'flex',
@@ -286,5 +294,34 @@ const styles = {
         cursor: 'pointer',
         width: '150px',
         border: 'none',
+    },
+    modal: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        color: 'black',
+        padding: '20px',
+        borderRadius: '5px',
+        width: '300px',
+        textAlign: 'center',
+    },
+    closeButton: {
+        marginTop: '15px',
+        padding: '8px 16px',
+        backgroundColor: '#00539C',
+        color: '#fff',
+        border: 'none',
+        cursor: 'pointer',
+        borderRadius: '5px',
     },
 };
