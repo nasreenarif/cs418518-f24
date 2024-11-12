@@ -12,4 +12,4 @@ const connection = await mysql.createConnection({
 })
 
 export { connection };
-
+//export default connection;

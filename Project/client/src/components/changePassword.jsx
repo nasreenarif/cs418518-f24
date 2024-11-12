@@ -22,6 +22,45 @@ export default function ChangePassword() {
         }
 
         try {
+            const response = await fetch('http://localhost:8080/user/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,  // Added email to the payload
+                    currentPassword: currentPassword,
+                    newPassword: newPassword,
+                }),
+            });
+
+            if (response.ok) {
+                setPasswordSuccess('Password changed successfully!');
+                setEmail('');
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+            } else {
+                const data = await response.json();
+                setPasswordError(data.message || 'Failed to change password.');
+            }
+        } catch (error) {
+            setPasswordError('An error occurred. Please try again.');
+        }
+    };
+
+    /* const handleChangePassword = async (event) => {
+        event.preventDefault();
+        setPasswordError('');
+        setPasswordSuccess('');
+
+        // Validate that new password and confirm password match
+        if (newPassword !== confirmPassword) {
+            setPasswordError('New password and confirm password do not match.');
+            return;
+        }
+
+        try {
             // Make a POST request to your backend API to change the password
             const response = await fetch('http://localhost:8080/user/change-password', {
                 method: 'POST',
@@ -49,7 +88,7 @@ export default function ChangePassword() {
         } catch (error) {
             setPasswordError('Failed to change password. Please try again.');
         }
-    };
+    }; */
 
     return (
         <div style={styles.container}>
@@ -124,7 +163,7 @@ const styles = {
         margin: '50px auto',
         borderRadius: '8px',
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        width: '400px',
+        width: '500px',
         textAlign: 'center',
     },
     heading: {

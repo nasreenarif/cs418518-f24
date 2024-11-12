@@ -36,70 +36,49 @@ export default function Login() {
             const formBody = JSON.stringify({
                 email: enteredEmail,
                 Password: enteredPassword
-            })
+            });
 
             const response = await fetch('http://localhost:8080/user/login', {
                 method: "POST",
                 body: formBody,
                 headers: {
-                    'content-type': 'application/json'
+                    'Content-Type': 'application/json'
                 }
             });
 
-
             const data = await response.json();
-            console.log('Fetched user data:', data); // Log the fetched data
+            console.log('Fetched user data:', data);
 
-            if (!response.ok) {
-                console.log('response not ok');
-                throw new Error('Login failed'); // Handle HTTP errors
+            // Check server response status directly
+            if (response.status === 403) {
+                setErrorMessage('Please verify your email before logging in.');
+                return;
             }
 
-            if (response.ok) {
-                console.log('response is ok');
-                if (data.message == "Please verify your email before logging in.") {
-                    setErrorMessage('Please verify email.');
-                    alert('Something went wrong. Check if you have verified your email.');
-                }
-
-                //code for 'login is successful'
-                else if (data.data.length > 0) {
-
-                    setIs2FARequired(true); // Show the 2FA input field
-                    setDisplayEmail("");    //display email is now empty string
-                    console.log('set 2FA required as TRUE');
-                    setErrorMessage("A 2FA code has been sent to your email. Please enter it below.");
-
-                    setErrorMessage('');    //clears error message
-                    setUserStateVal(1);
-
-                    //localStorage.setItem('storedEmail', JSON.stringify(enteredEmail));    //don't want to store it before 2FA passes
-
-                    console.log("userStateVal = " + userStateVal);
-
-                    /* navigate('/dashboard');     //placed inside IF */
-
-                }/*  else {
-                    // Show error message if login fails
-                    setErrorMessage('Invalid credentials. Please try again.');
-                    alert('Something went wrong. Check if you have verified your email.');
-                } */
-                /* if (data.data.isVerified == 0) {
-                    setErrorMessage('Please verify email before logging in.');
-                    alert('Please verify email before logging in.');
-                } */
-
-
+            if (response.status === 401) {
+                setErrorMessage('Invalid email or password. Please try again.');
+                return;
             }
+
+            // If 2FA code was sent successfully
+            if (response.status === 200 && data.message === "User sent 2FA Code") {
+                setIs2FARequired(true); // Show the 2FA input field
+                setErrorMessage('');    // Clear any previous error message
+                console.log("2FA required, waiting for code.");
+            } else {
+                setErrorMessage('Unexpected response from the server.');
+            }
+        } catch (error) {
+            setErrorMessage('Login failed. Please check your credentials and try again.');
+            console.error('Error during login:', error);
         }
-        catch (error) {
-            setErrorMessage(error.message);
-            alert(error.message);
-        }
-    }
+    };
+
+
 
     const handleVerify2FA = async (event) => {
         event.preventDefault();
+        console.log("Verify 2FA button clicked"); // Log for debugging
 
         try {
             const formBody = JSON.stringify({
@@ -111,22 +90,24 @@ export default function Login() {
                 method: "POST",
                 body: formBody,
                 headers: {
-                    'content-type': 'application/json'
+                    'Content-Type': 'application/json'
                 }
             });
 
             const data = await response.json();
+            console.log("2FA verification response:", data); // Log response for debugging
 
             if (response.ok) {
                 alert("Login successful");
-                localStorage.setItem('storedEmail', JSON.stringify(enteredEmail)); // Store email AFTER 2FA success
+                localStorage.setItem('storedEmail', JSON.stringify(enteredEmail)); // Store email after successful 2FA
                 navigate('/dashboard');
             } else {
                 setErrorMessage(data.message || '2FA verification failed');
             }
 
         } catch (error) {
-            setErrorMessage(error.message);
+            console.error("Error during 2FA verification:", error);
+            setErrorMessage('Verification failed. Please try again.');
         }
     };
 
@@ -284,3 +265,81 @@ const styles = {
         cursor: "pointer",
     },
 };
+
+/* const handleLogin = async (event) => {
+        event.preventDefault();
+        setSubmitted(true);
+
+        try {
+            const formBody = JSON.stringify({
+                email: enteredEmail,
+                Password: enteredPassword
+            });
+
+            const response = await fetch('http://localhost:8080/user/login', {
+                method: "POST",
+                body: formBody,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            console.log('Fetched user data:', data);
+
+            if (data.status === 403) {
+                setErrorMessage('Please verify your email before logging in.');
+                return;
+            }
+
+            if (data.status === 401) {
+                setErrorMessage('Invalid email or password. Please try again.');
+                return;
+            }
+
+            if (data.status === 200 && data.message === "User sent 2FA Code") {
+                setIs2FARequired(true); // Show the 2FA input field
+                setDisplayEmail("");    // Clear display email field
+                setErrorMessage('');    // Clear any previous error message
+                setUserStateVal(1);     // Update user state value as necessary
+                console.log("2FA required, waiting for code.");
+            } else {
+                setErrorMessage('Unexpected response from the server.');
+            }
+        } catch (error) {
+            setErrorMessage('Login failed. Please check your credentials and try again.');
+            console.error('Error during login:', error);
+        }
+    }; */
+
+/* const handleVerify2FA = async (event) => {
+    event.preventDefault();
+
+    try {
+        const formBody = JSON.stringify({
+            email: enteredEmail,
+            Code2FA: Code2FA
+        });
+
+        const response = await fetch('http://localhost:8080/user/verify-code', {
+            method: "POST",
+            body: formBody,
+            headers: {
+                'content-type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert("Login successful");
+            localStorage.setItem('storedEmail', JSON.stringify(enteredEmail)); // Store email AFTER 2FA success
+            navigate('/dashboard');
+        } else {
+            setErrorMessage(data.message || '2FA verification failed');
+        }
+
+    } catch (error) {
+        setErrorMessage(error.message);
+    }
+}; */

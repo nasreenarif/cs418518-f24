@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 export default function VerifyCode() {
     const [verificationCode, setVerificationCode] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const location = useLocation(); // Get the passed email from the previous page
+    const [searchParams] = useSearchParams(); // Use search params instead of location state
     const navigate = useNavigate();
 
-    const email = location.state.email; // Extract the email passed from the login page
+    // Get email from query parameters
+    const email = searchParams.get('email');
 
     const handleVerifyCode = async (event) => {
         event.preventDefault();
@@ -43,19 +44,25 @@ export default function VerifyCode() {
     return (
         <div style={styles.container}>
             <h2>Enter Verification Code</h2>
-            <p>A code has been sent to your email: {email}</p>
-            <form onSubmit={handleVerifyCode} style={styles.form}>
-                <label htmlFor="verificationCode">Verification Code:</label>
-                <input
-                    type="text"
-                    id="verificationCode"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    required
-                    style={styles.input}
-                />
-                <button type="submit" style={styles.button}>Verify Code</button>
-            </form>
+            {email ? (
+                <>
+                    <p>A code has been sent to your email: {email}</p>
+                    <form onSubmit={handleVerifyCode} style={styles.form}>
+                        <label htmlFor="verificationCode">Verification Code:</label>
+                        <input
+                            type="text"
+                            id="verificationCode"
+                            value={verificationCode}
+                            onChange={(e) => setVerificationCode(e.target.value)}
+                            required
+                            style={styles.input}
+                        />
+                        <button type="submit" style={styles.button}>Verify Code</button>
+                    </form>
+                </>
+            ) : (
+                <p style={{ color: 'red' }}>Invalid verification link. Please try again.</p>
+            )}
 
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         </div>

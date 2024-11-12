@@ -16,14 +16,14 @@ export default function ChangeInfo() {
         setError('');
 
         try {
-            console.log("first name, last name", First_Name + Last_Name);
+            console.log("First name, Last name:", First_Name, Last_Name);
             const response = await fetch('http://localhost:8080/user/change-info', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email: email, //locally stored email
+                    email: email, // Locally stored email
                     firstName: First_Name,
                     lastName: Last_Name,
                 }),
@@ -34,15 +34,15 @@ export default function ChangeInfo() {
                 throw new Error('Failed to update user information');
             }
 
-            /* const result = await response.json(); */
             setMessage('Information updated successfully!');
             setTimeout(() => {
-                navigate('/dashboard'); // Redirect to dashboard or after 2s
+                navigate('/dashboard'); // Redirect to dashboard after 2s
             }, 2000);
         } catch (error) {
             setError('Failed to update your information. Please try again.');
         }
     };
+
 
     return (
         <div style={styles.container}>
@@ -94,7 +94,7 @@ const styles = {
         margin: '50px auto',
         borderRadius: '8px',
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        width: '400px',
+        width: '500px',
         textAlign: 'center',
     },
     heading: {
