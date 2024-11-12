@@ -20,7 +20,7 @@ courses.get('/list', async (req, res) => {
 
 courses.get('/droplist', async (req, res) => {
     try {
-        const [rows] = await connection.execute('SELECT courseCode, courseName FROM coursecatalog');
+        const [rows] = await connection.execute('SELECT courseID, courseCode, courseName FROM coursecatalog');
         console.log('Fetched rows:', rows);
         res.status(200).json(rows);
     } catch (error) {

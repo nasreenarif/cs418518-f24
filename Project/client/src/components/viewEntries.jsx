@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 export default function ViewEntries() {
     const [entries, setEntries] = useState([]);
     const [error, setError] = useState('');
-    const [expandedEntry, setExpandedEntry] = useState(null); // Track expanded entry
     const [updatedEntries, setUpdatedEntries] = useState({}); // Tracks selected status per entry
     const [modalData, setModalData] = useState(null); // For modal content
     const [isModalOpen, setIsModalOpen] = useState(false); // Control modal visibility
@@ -35,15 +34,12 @@ export default function ViewEntries() {
         fetchEntries();
     }, [email, isAdmin]);
 
-    const toggleExpandedView = (id) => {
-        setExpandedEntry(expandedEntry === id ? null : id); //collapse if already expanded
-    };
 
     // Fetch student data and open modal
-    const handleStudentEmailClick = async (studentEmail) => {
+    const handleStudentEmailClick = async (studentEmail, advisingID) => {
         try {
             //updated to RECORDS/student-info
-            const response = await fetch(`http://localhost:8080/records/student-info?email=${studentEmail}`);
+            const response = await fetch(`http://localhost:8080/records/student-info?email=${studentEmail}&advisingID=${advisingID}`);
             const data = await response.json();
             if (!response.ok) throw new Error('Failed to fetch student info');
             setModalData({ ...data, studentEmail }); // Set modal content
@@ -100,8 +96,34 @@ export default function ViewEntries() {
         }));
     };
 
-
     const handleSubmitChanges = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/records/update-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ updates: updatedEntries }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update entries');
+            }
+
+            alert('Entries updated and emails sent successfully');
+
+            // Refetch entries to update the UI after submission
+            const refreshedEntries = await fetch(`http://localhost:8080/records`);
+            setEntries(await refreshedEntries.json());
+            setUpdatedEntries({});
+        } catch (error) {
+            console.error('Error updating entries:', error);
+            setError('Failed to update entries. Please try again later.');
+        }
+    };
+
+
+    /* const handleSubmitChanges = async () => {
         try {
             const response = await fetch('http://localhost:8080/records', {
                 method: 'POST',
@@ -124,7 +146,7 @@ export default function ViewEntries() {
             console.error('Error updating entries:', error);
             setError('Failed to update entries. Please try again later.');
         }
-    };
+    }; */
 
     return (
         <div style={styles.container}>
@@ -148,7 +170,7 @@ export default function ViewEntries() {
                             <tr>
                                 <td style={styles.td}>
                                     <span
-                                        onClick={() => handleStudentEmailClick(entry.studentEmail)}
+                                        onClick={() => handleStudentEmailClick(entry.studentEmail, entry.advisingID)}
                                         style={{ cursor: 'pointer', color: '#00539C' }}
                                     >
                                         {entry.studentEmail}
@@ -211,6 +233,34 @@ export default function ViewEntries() {
                         <p style={{ color: 'black' }}><strong>Last Name:</strong> {modalData.lastName}</p>
                         <p style={{ color: 'black' }}><strong>Last Term:</strong> {modalData.lastTerm}</p>
                         <p style={{ color: 'black' }}><strong>Last GPA:</strong> {modalData.lastGPA}</p>
+
+                        {/* Course Plan Section */}
+                        <h4 style={{ color: 'black', marginTop: '15px' }}>Course Plan</h4>
+                        <ul style={{ color: 'black' }}>
+                            {modalData.courses && modalData.courses.length > 0 ? (
+                                modalData.courses.map((course, index) => (
+                                    <li key={index}>
+                                        <strong>{course.courseCode}</strong>: {course.courseName}
+                                    </li>
+                                ))
+                            ) : (
+                                <p>No courses found for this advising entry.</p>
+                            )}
+                        </ul>
+                        {/* Prereq Plan Section */}
+                        <h4 style={{ color: 'black', marginTop: '15px' }}>Prerequisites</h4>
+                        <ul style={{ color: 'black' }}>
+                            {modalData.prereqs && modalData.prereqs.length > 0 ? (
+                                modalData.prereqs.map((course, index) => (
+                                    <li key={index}>
+                                        <strong>{course.preCourseCode}</strong>: {course.preCourseName}
+                                    </li>
+                                ))
+                            ) : (
+                                <p>No prereqs found for this advising entry.</p>
+                            )}
+                        </ul>
+
                         <button onClick={closeModal} style={styles.closeButton}>Close</button>
                     </div>
                 </div>
@@ -249,12 +299,6 @@ const styles = {
     td: {
         padding: '10px',
         borderBottom: '1px solid #ddd',
-        textAlign: 'left',
-    },
-    expandedRow: {
-        backgroundColor: '#f9f9f9',
-        padding: '20px',
-        borderRadius: '8px',
         textAlign: 'left',
     },
     details: {

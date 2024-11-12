@@ -8,7 +8,7 @@ const prereqs = Router();
 
 prereqs.get('/list', async (req, res) => {
     try {
-        const [rows] = await connection.execute('SELECT preCourseCode, preCourseName FROM prereqcatalog');
+        const [rows] = await connection.execute('SELECT courseID, preCourseCode, preCourseName FROM prereqcatalog');
         console.log('Fetched rows:', rows);
         res.status(200).json(rows);
     } catch (error) {

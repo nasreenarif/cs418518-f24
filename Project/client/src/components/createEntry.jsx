@@ -50,6 +50,63 @@ export default function CreateEntry() {
         setMessage('');
         setError('');
 
+        console.log("Selected Items Prereqs (courseCodes):", selectedItemsPrereqs);
+        console.log("Prereq Options (should include courseID and courseCode):", prereqOptions);
+
+        // Map courseCode to courseID for selected courses
+        const selectedCourseIDs = selectedItemsCourses.map(courseCode => {
+            const course = courseOptions.find(option => option.courseCode === courseCode);
+            return course ? course.courseID : null;
+        }).filter(courseID => courseID !== null); // Filter out any nulls
+
+        // Map courseCode to courseID for selected prerequisites
+        const selectedPrereqIDs = selectedItemsPrereqs.map(courseCode => {
+            const prereq = prereqOptions.find(option => option.preCourseCode === courseCode);
+            if (!prereq) {
+                console.log(`No match found for courseCode: ${courseCode} in prereqOptions`);
+            }
+            return prereq ? prereq.courseID : null;
+        }).filter(courseID => courseID !== null); // Filter out any nulls
+
+        try {
+            const response = await fetch('http://localhost:8080/records/create-entry', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    lastTerm,
+                    lastGPA,
+                    currentTerm,
+                    selectedItems1: selectedPrereqIDs, // Send mapped course IDs
+                    selectedItems2: selectedCourseIDs,  // Send mapped course IDs
+                }),
+            });
+
+            console.log("Selected Prereq IDs:", selectedPrereqIDs);
+            console.log("Selected Course IDs:", selectedCourseIDs);
+
+
+            if (!response.ok) {
+                throw new Error('Failed to create entry');
+            }
+
+            setMessage('Entry submitted successfully!');
+            setTimeout(() => {
+                navigate('/dashboard'); // Redirect to dashboard after success
+            }, 2000);
+        } catch (error) {
+            setError('Failed to submit entry. Please try again.');
+        }
+    };
+
+
+    /* const handleCreateEntry = async (event) => {
+        event.preventDefault();
+        setMessage('');
+        setError('');
+
         try {
             const response = await fetch('http://localhost:8080/records/create-entry', {
                 method: 'POST',
@@ -66,6 +123,9 @@ export default function CreateEntry() {
                 }),
             });
 
+            console.log('Selected Courses:', selectedItemsCourses);
+            console.log('Selected Prereqs:', selectedItemsPrereqs); 
+
             if (!response.ok) {
                 throw new Error('Failed to create entry');
             }
@@ -77,7 +137,7 @@ export default function CreateEntry() {
         } catch (error) {
             setError('Failed to submit entry. Please try again.');
         }
-    };
+    }; */
 
     //handles dropdown change
     const handleDropdownChangeList1 = (index, value) => {

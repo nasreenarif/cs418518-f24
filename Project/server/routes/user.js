@@ -227,58 +227,6 @@ user.post("/login", async (req, res) => {
 });
 
 
-/* user.post("/login", (req, res) => { //login and 2FA process
-  connection.execute(
-    "SELECT * FROM userdata WHERE email = ?",
-    [req.body.email],
-    function (err, result) {
-      if (err) {
-        return res.status(500).json({ message: err.message });
-      }
-
-      if (result.length === 0) { // Check if user exists
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      // Check if user is verified
-      if (result[0].isVerified === 0) {
-        return res.status(403).json({ message: "Please verify your email before logging in." });
-      }
-
-      // Compare passwords
-      if (ComparePassword(req.body.Password, result[0].Password)) {
-        const Code2FA = generateRandomCode(); // Generate 2FA code
-        const Code2FAExpires = Date.now() + 5 * 60 * 1000; // 5-minute expiration for 2FA code
-
-        // Save 2FA code and expiration to the database
-        connection.execute(
-          'UPDATE userdata SET Code2FA = ?, Code2FAExpires = ? WHERE email = ?',
-          [Code2FA, Code2FAExpires, req.body.email],
-          async (err) => {
-            if (err) {
-              return res.status(500).json({ message: 'Error saving 2FA code' });
-            }
-
-            // Send the 2FA code by email and wait for completion
-            try {
-              await SendMail(req.body.email, 'Archer Advising 2FA Code', `Your 2FA code is: ${Code2FA}`);
-              res.status(200).json({
-                message: "User sent 2FA Code",
-                data: result,
-              });
-            } catch (mailError) {
-              console.error("Error sending 2FA email:", mailError);
-              res.status(500).json({ message: "Error sending 2FA email" });
-            }
-          }
-        );
-      } else {
-        res.status(401).json({ message: "Invalid password" });
-      }
-    }
-  );
-}); */
-
 user.post("/change-password", async (req, res) => {
   const { email, currentPassword, newPassword } = req.body;
 
@@ -334,62 +282,6 @@ user.post("/change-password", async (req, res) => {
   }
 });
 
-
-/* user.post("/change-password", (req, res) => {
-  //select the user based on email
-  connection.execute(
-    "select * from userdata where email=?",
-    [req.body.email],
-    function (err, result) {
-      if (err) {
-        res.json({
-          status: 500,
-          message: err.message,
-        });
-      } else if (result.length === 0) {
-        //user not found
-        res.json({
-          status: 404,
-          message: "User not found.",
-        });
-      } else {
-        //verify current password
-        const user = result[0];
-        if (ComparePassword(req.body.currentPassword, user.Password)) {
-          //hash new password
-          const newHashedPassword = HashedPassword(req.body.newPassword);
-
-          //update password in the database
-          connection.execute(
-            "update userdata set Password=? where email=?",
-            [newHashedPassword, req.body.email],
-            function (updateErr, updateResult) {
-              if (updateErr) {
-                res.json({
-                  status: 500,
-                  message: updateErr.message,
-                });
-              } else {
-                //respond with success message
-                res.json({
-                  status: 200,
-                  message: "Password changed successfully.",
-                  data: updateResult,
-                });
-              }
-            }
-          );
-        } else {
-          //invalid current password
-          res.json({
-            status: 401,
-            message: "Invalid current password.",
-          });
-        }
-      }
-    }
-  );
-}); */
 
 user.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
@@ -510,53 +402,6 @@ user.put('/change-info', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-
-
-/* user.post("/change-info", (req, res) => {
-  //select the user based on email
-  connection.execute(
-    "select * from userdata where email=?",
-    [req.body.email],
-    function (err, result) {
-      if (err) {
-        res.json({
-          status: 500,
-          message: err.message,
-        });
-      } else if (result.length === 0) {
-        //if user not found
-        res.json({
-          status: 404,
-          message: "User not found.",
-        });
-      } else {
-        //update the name in database
-        connection.execute(
-          "update userdata set First_Name=?, Last_Name=? where email=?",
-          [req.body.firstName, req.body.lastName, req.body.email],
-          function (updateErr, updateResult) {
-            if (updateErr) {
-              res.json({
-                status: 500,
-                message: updateErr.message,
-              });
-            } else {
-              //respond with success message
-              res.json({
-                status: 200,
-                message: "Name changed successfully.",
-                data: updateResult,
-              });
-            }
-          }
-        );
-      }
-    });
-}
-
-
-); */
 
 
 export default user;
