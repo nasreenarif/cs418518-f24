@@ -113,7 +113,7 @@ user.post("/login", (req, res) => {
           res.json({
             status: 200,
             message: "user logged in successfully",
-            data: result,
+            data: result[0],
           });
         }
         else {

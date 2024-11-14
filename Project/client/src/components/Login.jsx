@@ -46,7 +46,7 @@ export default function Login() {
         .then((result) => {
           if(result.status == 200){
             console.log(result.data);
-            // console.log(result);
+            console.log(result);
             navigate("/dashboard");            
            } else {
             setMessage("Invalid Credentials");
