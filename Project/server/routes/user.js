@@ -109,7 +109,7 @@ user.post("/login", (req, res) => {
         if (ComparePasword(req.body.password, result[0].PASSWORD)) {
 
           // SendMail(req.body.email,"Login Verification","Your login verification is 1234567")
-
+          req.session.user=result[0];
           res.json({
             status: 200,
             message: "user logged in successfully",
