@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
+import Cookies from "js-cookie";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
@@ -9,7 +9,7 @@ export default function Login() {
     const [submitted, setSubmitted] = useState(false);
     const navigate = useNavigate();
     const [message, setMessage] = useState("");
-    const refRecaptch=useRef(null);
+    // const refRecaptch=useRef(null);
 
     function handleInputChange(identifier, value) {
         if (identifier === "email") {
@@ -22,8 +22,8 @@ export default function Login() {
     const handleLogin = async (event) => {
 
         event.preventDefault();
-
-        const currentValue=refRecaptch.current.getValue();
+        const currentValue=true;
+        // const currentValue=refRecaptch.current.getValue();
         if(!currentValue){
             alert("Please verify you are not bot!")
         }
@@ -39,6 +39,7 @@ export default function Login() {
          await fetch(import.meta.env.VITE_API_KEY +"/user/login", {
             method: "POST",
             body: formBody,
+            credentials: 'include',
             headers: {
                 "content-type": "application/json",
             },
@@ -46,7 +47,8 @@ export default function Login() {
         .then((result) => {
           if(result.status == 200){
             console.log(result.data);
-            // console.log(result);
+            Cookies.set("User_ID",result.data.USER_ID);
+            console.log(result);
             navigate("/dashboard");            
            } else {
             setMessage("Invalid Credentials");
@@ -81,7 +83,7 @@ export default function Login() {
                         }
                     />
                 </p>
-                <ReCAPTCHA sitekey={import.meta.env.VITE_SITE_KEY} ref={refRecaptch} ></ReCAPTCHA>
+                
             </div>
             <div className="actions">
                 <button type="button" className="text-button">
