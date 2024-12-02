@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function CourseCatalog() {
     const [courses, setCourses] = useState([]);
+    const [prerequisites, setPrerequisites] = useState([]);
     const [selectedPrerequisites, setSelectedPrerequisites] = useState({});
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -24,6 +25,22 @@ export default function CourseCatalog() {
         };
 
         fetchCourses();
+    }, []);
+
+    useEffect(() => {
+        const fetchPrerequisites = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/prereqs/list');
+                if (!response.ok) throw new Error('Failed to fetch prerequisites');
+                const data = await response.json();
+                setPrerequisites(data); // Assuming the response is an array
+            } catch (error) {
+                console.error('Error fetching prerequisites:', error);
+                setError('Failed to load prerequisites. Please try again later.');
+            }
+        };
+
+        fetchPrerequisites();
     }, []);
 
     const handleCheckboxChange = (courseID, type) => {
@@ -79,7 +96,19 @@ export default function CourseCatalog() {
                 <link rel="icon" href="/favicon.ico" type="image/x-icon" />
                 <meta name="description" content="Edit Prerequisites." />
             </Helmet>
-            <h2 style={styles.heading}>Course Catalog</h2>
+            {/* Display current prerequisites */}
+            <div style={styles.prerequisitesContainer}>
+                <h3 style={styles.heading}>List of Current Prerequisites</h3>
+                <ul>
+                    {prerequisites.map((prerequisite) => (
+                        <li key={prerequisite.courseID}>
+                            {prerequisite.preCourseCode} - {prerequisite.preCourseName}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+            <br></br>
+            <h2 style={styles.heading}>Courses Catalog</h2>
 
             {error && <p style={{ color: 'red' }}>{error}</p>}
 

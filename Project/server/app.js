@@ -1,5 +1,3 @@
-// console.log('Hello from node application');
-
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";

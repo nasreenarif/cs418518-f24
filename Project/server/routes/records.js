@@ -2,9 +2,6 @@ import { Router } from "express";
 import { connection } from "../database/database.js";
 import { SendMail } from "../utils/SendMail.js";
 
-import { ComparePassword, HashedPassword } from "../utils/helper.js";
-import * as crypto from "crypto"; //generates tokens
-
 const records = Router();
 
 //fetch records entries from the database
@@ -69,6 +66,45 @@ records.get('/student-info', async (req, res) => {
         res.status(500).json({ message: 'Error retrieving student information' });
     }
 });
+
+//checks against courses schedules for other terms
+records.get('/previous-courses', async (req, res) => {
+    const { email } = req.query;
+
+    if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+    }
+
+    try {
+        const query = `
+            SELECT DISTINCT cc.courseCode, cc.courseName
+            FROM records r
+            JOIN coursemapping cm ON r.advisingID = cm.advising_ID
+            JOIN coursecatalog cc ON cm.course_ID = cc.courseID
+            WHERE r.studentEmail = ?
+        `;
+
+        // Execute the query with the provided email
+        const [rows] = await connection.execute(query, [email]);
+
+        // If no previously scheduled courses
+        if (rows.length === 0) {
+            return res.status(200).json({ message: 'No previously taken courses found.', courses: [] });
+        }
+
+        // Map results to a simpler format if needed
+        const courses = rows.map(row => ({
+            courseCode: row.courseCode,
+            courseName: row.courseName,
+        }));
+
+        res.status(200).json(courses);
+    } catch (error) {
+        console.error('Error fetching previous courses:', error);
+        res.status(500).json({ message: 'Failed to fetch previous courses' });
+    }
+});
+
 
 
 
@@ -142,6 +178,7 @@ records.post('/update-status', async (req, res) => {
     }
 });
 
+//working /create-entry route
 /* records.post('/create-entry', async (req, res) => {
     const { email, lastTerm, lastGPA, currentTerm, selectedItems1, selectedItems2 } = req.body;
 
@@ -196,33 +233,98 @@ records.post('/create-entry', async (req, res) => {
     const { email, lastTerm, lastGPA, currentTerm, selectedItems1, selectedItems2 } = req.body;
 
     try {
+        console.log('Received payload:', req.body); // Log received data
+    } catch (error) {
+        console.error('Error parsing request body:', error);
+        res.status(400).json({ message: 'Invalid request payload' });
+    }
+
+    try {
         // Start a transaction to ensure atomicity
         await connection.beginTransaction();
 
-        // Step 1: Insert a single record into 'records' table
+        // Step 1: Check for conflicting courses in other terms (coursecatalog)
+        const placeholders = selectedItems2.map(() => '?').join(', ');
+        const [conflictingCourses] = await connection.execute(
+            `
+            SELECT DISTINCT cc.courseName
+            FROM records r
+            JOIN coursemapping cm ON r.advisingID = cm.advising_ID
+            JOIN coursecatalog cc ON cm.course_ID = cc.courseID
+            WHERE r.studentEmail = ?
+            AND r.currentTerm != ?
+            AND cm.course_ID IN (${placeholders})
+            `,
+            [email, currentTerm, ...selectedItems2]
+        );
+
+        if (conflictingCourses.length > 0) {
+            // Roll back the transaction since we are not proceeding with the entry
+            await connection.rollback();
+
+            // Extract course names of conflicting courses
+            const conflictingCourseNames = conflictingCourses.map(row => row.courseName);
+            return res.status(400).json({
+                message: 'Cannot create entry. The following courses are already scheduled in other terms:',
+                conflictingCourses: conflictingCourseNames,
+            });
+        }
+
+        // Step 1.5: Check for conflicting prerequisites in other terms (prereqcatalog)
+        const prereqPlaceholders = selectedItems1.map(() => '?').join(', ');
+        const [conflictingPrereqs] = await connection.execute(
+            `
+            SELECT DISTINCT pc.preCourseName
+            FROM records r
+            JOIN prereqmapping pm ON r.advisingID = pm.advising_ID
+            JOIN prereqcatalog pc ON pm.course_ID = pc.courseID
+            WHERE r.studentEmail = ?
+            AND r.currentTerm != ?
+            AND pm.course_ID IN (${prereqPlaceholders})
+            `,
+            [email, currentTerm, ...selectedItems1]
+        );
+
+        if (conflictingPrereqs.length > 0) {
+            await connection.rollback();
+
+            const conflictingPrereqNames = conflictingPrereqs.map(row => row.preCourseName);
+            return res.status(400).json({
+                message: 'Cannot create entry. The following prerequisites are already scheduled in other terms:',
+                conflictingPrereqs: conflictingPrereqNames,
+            });
+        }
+
+        // Step 2: Insert a single record into 'records' table
         const [result] = await connection.execute(
             'INSERT INTO records (studentEmail, lastTerm, lastGPA, currentTerm) VALUES (?, ?, ?, ?)',
             [email, lastTerm, lastGPA, currentTerm]
         );
 
-        // Step 2: Get the advisingID of the newly created record
+        // Step 3: Get the advisingID of the newly created record
         const advisingID = result.insertId;
 
-        // Step 3: Insert selected courses into 'coursemapping' table
+        // Step 4: Insert selected courses into 'coursemapping' table
         if (selectedItems2 && selectedItems2.length > 0) {
             const courseMappingValues = selectedItems2.map(courseID => [advisingID, courseID]);
+            const mappingPlaceholders = courseMappingValues.map(() => '(?, ?)').join(', ');
+            const flattenedValues = courseMappingValues.flat();
+
             await connection.query(
-                'INSERT INTO coursemapping (advising_ID, course_ID) VALUES ?',
-                [courseMappingValues]
+                `INSERT INTO coursemapping (advising_ID, course_ID) VALUES ${mappingPlaceholders}`,
+                flattenedValues
             );
         }
 
-        // Step 4: Insert selected prerequisites into 'prereqmapping' table
+        // Step 5: Insert selected prerequisites into 'prereqmapping' table
         if (selectedItems1 && selectedItems1.length > 0) {
             const prereqMappingValues = selectedItems1.map(courseID => [advisingID, courseID]);
+            const mappingPlaceholders = prereqMappingValues.map(() => '(?, ?)').join(', ');
+            const flattenedValues = prereqMappingValues.flat();
+
             await connection.query(
-                'INSERT INTO prereqmapping (advising_ID, course_ID) VALUES ?',
-                [prereqMappingValues]
+                `INSERT INTO prereqmapping (advising_ID, course_ID) VALUES ${mappingPlaceholders}`,
+                flattenedValues
             );
         }
 
@@ -237,5 +339,6 @@ records.post('/create-entry', async (req, res) => {
         res.status(500).json({ message: 'Failed to create entry' });
     }
 });
+
 
 export default records;

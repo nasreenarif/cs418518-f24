@@ -25,6 +25,8 @@ export default function ViewEntries() {
                     throw new Error('Failed to fetch entries');
                 }
 
+                console.log('Fetched entries:', data);
+
                 setEntries(data);
             } catch (error) {
                 console.error('Error fetching entries:', error);

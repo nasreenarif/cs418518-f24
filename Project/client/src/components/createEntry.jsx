@@ -8,11 +8,11 @@ export default function CreateEntry() {
     const [currentTerm, setCurrentTerm] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const [dropdownOptions, setDropdownOptions] = useState([]); // Options from the database
     const [selectedItemsPrereqs, setSelectedItemsPrereqs] = useState(['']); // Array to hold each dropdown's selected value
     const [selectedItemsCourses, setSelectedItemsCourses] = useState(['']); // Array to hold each dropdown's selected value
     const [courseOptions, setCourseOptions] = useState([]);  // Options for the "Course Plan" dropdown
     const [prereqOptions, setPrereqOptions] = useState([]);  // Options for the "Prerequisites" dropdown
+    const [previousCourses, setPreviousCourses] = useState([]);
     const navigate = useNavigate();
 
     const email = JSON.parse(localStorage.getItem('storedEmail'));  // Get stored email
@@ -46,7 +46,94 @@ export default function CreateEntry() {
         fetchDropdownOptions();
     }, []);
 
+    useEffect(() => {
+        async function fetchPreviousCourses() {
+            try {
+                const response = await fetch(`http://localhost:8080/records/previous-courses?email=${email}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch already scheduled courses');
+                }
+
+                const data = await response.json();
+                setPreviousCourses(data); // Assuming `data` is an array of course codes
+            } catch (error) {
+                console.error('Error fetching scheduled courses:', error);
+                setError('Failed to load already scheduled courses.');
+            }
+        }
+
+        fetchPreviousCourses();
+    }, [email]);
+
     const handleCreateEntry = async (event) => {
+        event.preventDefault();
+        setMessage('');
+        setError('');
+
+        // Map courseCode to courseID for selected courses
+        const selectedCourseIDs = selectedItemsCourses.map(courseCode => {
+            const course = courseOptions.find(option => option.courseCode === courseCode);
+            return course ? course.courseID : null;
+        }).filter(courseID => courseID !== null); // Filter out any nulls
+
+        // Map courseCode to courseID for selected prerequisites
+        const selectedPrereqIDs = selectedItemsPrereqs.map(courseCode => {
+            const prereq = prereqOptions.find(option => option.preCourseCode === courseCode);
+            return prereq ? prereq.courseID : null;
+        }).filter(courseID => courseID !== null); // Filter out any nulls
+
+        try {
+            console.log('Submitting data:', {
+                email: email,
+                lastTerm,
+                lastGPA,
+                currentTerm,
+                selectedItems1: selectedPrereqIDs, // Send mapped course IDs
+                selectedItems2: selectedCourseIDs, // Send mapped course IDs
+            });
+
+            const response = await fetch('http://localhost:8080/records/create-entry', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    lastTerm,
+                    lastGPA,
+                    currentTerm,
+                    selectedItems1: selectedPrereqIDs, // Send mapped course IDs
+                    selectedItems2: selectedCourseIDs, // Send mapped course IDs
+                }),
+            });
+
+            if (!response.ok) {
+                // Parse the error response from the backend
+                const errorData = await response.json();
+                console.error('Backend error:', errorData);
+
+                // Handle conflicting courses and prerequisites
+                if (errorData.message && errorData.conflictingCourses) {
+                    setError(`${errorData.message} ${errorData.conflictingCourses.join(', ')}`);
+                } else if (errorData.message && errorData.conflictingPrereqs) {
+                    setError(`${errorData.message} ${errorData.conflictingPrereqs.join(', ')}`);
+                } else {
+                    setError('An unknown error occurred. Please try again.');
+                }
+                return;
+            }
+
+            setMessage('Entry submitted successfully!');
+            setTimeout(() => {
+                navigate('/dashboard'); // Redirect to dashboard after success
+            }, 2000);
+        } catch (error) {
+            console.error('Error in submission:', error.message);
+            setError('Failed to submit entry. Please try again.');
+        }
+    };
+
+    /* const handleCreateEntry = async (event) => {
         event.preventDefault();
         setMessage('');
         setError('');
@@ -100,45 +187,8 @@ export default function CreateEntry() {
         } catch (error) {
             setError('Failed to submit entry. Please try again.');
         }
-    };
-
-
-    /* const handleCreateEntry = async (event) => {
-        event.preventDefault();
-        setMessage('');
-        setError('');
-
-        try {
-            const response = await fetch('http://localhost:8080/records/create-entry', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    lastTerm,
-                    lastGPA,
-                    currentTerm,
-                    selectedItems1: selectedItemsPrereqs, // Array of selected items from dropdowns
-                    selectedItems2: selectedItemsCourses,
-                }),
-            });
-
-            console.log('Selected Courses:', selectedItemsCourses);
-            console.log('Selected Prereqs:', selectedItemsPrereqs); 
-
-            if (!response.ok) {
-                throw new Error('Failed to create entry');
-            }
-
-            setMessage('Entry submitted successfully!');
-            setTimeout(() => {
-                navigate('/dashboard'); // Redirect to dashboard after success
-            }, 2000);
-        } catch (error) {
-            setError('Failed to submit entry. Please try again.');
-        }
     }; */
+
 
     //handles dropdown change
     const handleDropdownChangeList1 = (index, value) => {
