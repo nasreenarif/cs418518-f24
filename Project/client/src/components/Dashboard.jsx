@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet';
 import advisingPhoto from '../images/advising_photo_crop.png';
 
 export default function Dashboard() {
@@ -38,6 +39,12 @@ export default function Dashboard() {
 
     return (
         <div style={styles.body}>
+            <Helmet>
+                <title>Archer Advising</title>
+                <link rel="icon" href="/favicon.png" type="image/png" />
+                <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+                <meta name="description" content="Archer Advising Dashboard." />
+            </Helmet>
             <header style={styles.header}>
                 <h1 style={styles.headerTitle}>Archer Advising Portal</h1>
                 <div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateEntry() {
@@ -161,6 +162,12 @@ export default function CreateEntry() {
 
     return (
         <div style={styles.container}>
+            <Helmet>
+                <title>Archer Advising</title>
+                <link rel="icon" href="/favicon.png" type="image/png" />
+                <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+                <meta name="description" content="Creat Advising entry." />
+            </Helmet>
             <h2 style={styles.heading}>Create New Advising Entry for "{email}"</h2>
             <form onSubmit={handleCreateEntry} style={styles.form}>
                 <div>

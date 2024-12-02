@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet';
 import { useNavigate } from "react-router-dom";
 
 /* import "../styles/loginStyle.css" */
@@ -118,6 +119,12 @@ export default function Login() {
     return (
 
         <div>
+            <Helmet>
+                <title>Archer Advising</title>
+                <link rel="icon" href="/favicon.png" type="image/png" />
+                <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+                <meta name="description" content="Login page for Archer Advising platform." />
+            </Helmet>
             <header style={{ backgroundColor: "#00539C", color: "#fff", padding: "20px", textAlign: "center" }}>
                 <h1 style={styles.headerTitle}>Welcome to Archer Advising</h1>
                 <p>CS418 Web Programming Fall 2024</p>

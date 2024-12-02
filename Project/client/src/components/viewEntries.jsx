@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 
 export default function ViewEntries() {
@@ -150,6 +151,12 @@ export default function ViewEntries() {
 
     return (
         <div style={styles.container}>
+            <Helmet>
+                <title>Archer Advising</title>
+                <link rel="icon" href="/favicon.png" type="image/png" />
+                <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+                <meta name="description" content="View Advising Entries." />
+            </Helmet>
             <h2 style={styles.heading}>Submitted Entries</h2>
 
             {error && <p style={{ color: 'red' }}>{error}</p>}

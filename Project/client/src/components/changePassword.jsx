@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 
 export default function ChangePassword() {
@@ -92,6 +93,12 @@ export default function ChangePassword() {
 
     return (
         <div style={styles.container}>
+            <Helmet>
+                <title>Archer Advising</title>
+                <link rel="icon" href="/favicon.png" type="image/png" />
+                <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+                <meta name="description" content="Change Password." />
+            </Helmet>
             <h2 style={styles.h2}>Password Change Form</h2>
             <form onSubmit={handleChangePassword} style={styles.form}>
                 <div>
