@@ -39,6 +39,10 @@ app.use('/prereqs', prereqs);
 app.use('/courses', courses);
 app.use('/records', records);
 
+app.get('/', (req, res) => {
+    res.send('Welcome to the CS418 Advising Website API!');
+});
+
 // Serve iframe-test.html
 app.get("/iframe-test", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "iframe-test.html"));
