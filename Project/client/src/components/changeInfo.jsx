@@ -30,7 +30,7 @@ export default function ChangeInfo() {
 
         try {
             console.log("First name, Last name:", First_Name, Last_Name);
-            const response = await fetch('https://cs418-advising-website.onrender.com/user/change-info', {
+            const response = await fetch('/api/user/change-info', {
                 /* const response = await fetch('http://localhost:8080/user/change-info', { */
                 method: 'POST',
                 headers: {

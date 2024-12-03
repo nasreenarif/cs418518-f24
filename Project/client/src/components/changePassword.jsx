@@ -59,7 +59,7 @@ export default function ChangePassword() {
         }
 
         try {
-            const response = await fetch('https://cs418-advising-website.onrender.com/user/change-password', {
+            const response = await fetch('/api/user/change-password', {
                 /* const response = await fetch('http://localhost:8080/user/change-password', { */
                 method: 'POST',
                 headers: {
