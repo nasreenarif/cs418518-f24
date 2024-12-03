@@ -2,6 +2,18 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateAccount() {
+    useEffect(() => {
+        // Check if the page is being loaded in an iframe
+        if (window.self !== window.top) {
+            document.body.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: white;">
+              <h1 style="color: red; font-family: Arial, sans-serif;">This content cannot be displayed in an iframe.</h1>
+            </div>
+          `;
+            throw new Error("This content cannot be displayed in an iframe.");
+        }
+    }, []);
+
     const [First_Name, setFirstName] = useState('');
     const [Last_Name, setLastName] = useState('');
     const [Email, setEmail] = useState('');
@@ -10,10 +22,34 @@ export default function CreateAccount() {
     const [error, setError] = useState(''); // To handle error messages
     const navigate = useNavigate();
 
+    // Password validation logic
+    const validatePassword = (password) => {
+        const rules = [
+            { regex: /.{8,}/, message: "At least 8 characters long" },
+            { regex: /[A-Z]/, message: "At least one uppercase letter" },
+            { regex: /[a-z]/, message: "At least one lowercase letter" },
+            { regex: /[0-9]/, message: "At least one number" },
+            { regex: /[!@#$%^&*(),.?":{}|<>]/, message: "At least one special character" },
+        ];
+
+        const errors = rules
+            .filter((rule) => !rule.regex.test(password))
+            .map((rule) => rule.message);
+
+        return errors;
+    };
+
     const handleCreateAccount = async (event) => {
         event.preventDefault();
         setMessage('');
         setError(''); // Clear any previous error
+
+        // Validate password complexity
+        const passwordErrors = validatePassword(Password);
+        if (passwordErrors.length > 0) {
+            setError(`Password must meet the following criteria:\n${passwordErrors.join('\n')}`);
+            return;
+        }
 
         try {
             const response = await fetch('http://localhost:8080/user', {
@@ -29,7 +65,7 @@ export default function CreateAccount() {
                 }),
             });
 
-            const result = await response.json();
+            /* const result = await response.json(); */
 
             if (response.status === 409) {
                 // Email already exists, show error message

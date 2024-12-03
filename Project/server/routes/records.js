@@ -156,16 +156,24 @@ records.post('/update-status', async (req, res) => {
 
                 if (record) {
                     const { studentEmail, currentTerm } = record;
+                    const advisorComments = update.comments || 'No additional comments provided.';
                     let subject = 'Your Advising Plan Update';
                     let message;
 
                     if (update.status === 'accepted') {
                         // Accepted email message
-                        message = `Your Advising plan for the term '${currentTerm}' has been accepted.`;
+                        message = `
+                            <p>Congratulations,</p>
+                            <p>Your Advising plan for the term <strong>${currentTerm}</strong> has been accepted!</p>
+                            <p><strong>Advisor Comments:</strong> ${advisorComments}</p>
+                        `;
                     } else if (update.status === 'rejected') {
                         // Rejected email message with reason
-                        const rejectReason = update.rejectReason || 'No specific reason provided';
-                        message = `Your Advising plan for the term '${currentTerm}' has been rejected because: ${rejectReason}`;
+                        message = `
+                            <p>We're sorry,</p>
+                            <p>Your Advising plan for the term <strong>${currentTerm}</strong> has been rejected.</p>
+                            <p><strong>Advisor Comments:</strong> ${advisorComments}</p>
+                        `;
                     }
 
                     // Send the email
@@ -245,6 +253,38 @@ records.post('/create-entry', async (req, res) => {
     try {
         // Start a transaction to ensure atomicity
         await connection.beginTransaction();
+
+        // Step 0: Check for existing `Pending` record with the same lastTerm and currentTerm
+        const [existingPendingRecords] = await connection.execute(
+            `
+            SELECT advisingID 
+            FROM records 
+            WHERE studentEmail = ? AND lastTerm = ? AND currentTerm = ? AND status = 'Pending'
+            `,
+            [email, lastTerm, currentTerm]
+        );
+
+        if (existingPendingRecords.length > 0) {
+            const existingAdvisingID = existingPendingRecords[0].advisingID;
+
+            // Delete related entries from coursemapping and prereqmapping
+            await connection.execute(
+                'DELETE FROM coursemapping WHERE advising_ID = ?',
+                [existingAdvisingID]
+            );
+            await connection.execute(
+                'DELETE FROM prereqmapping WHERE advising_ID = ?',
+                [existingAdvisingID]
+            );
+
+            // Delete the record from records table
+            await connection.execute(
+                'DELETE FROM records WHERE advisingID = ?',
+                [existingAdvisingID]
+            );
+
+            console.log(`Deleted existing Pending record with advisingID ${existingAdvisingID}`);
+        }
 
         // Step 1: Check for conflicting courses in other terms (coursecatalog)
         const placeholders = selectedItems2.map(() => '?').join(', ');

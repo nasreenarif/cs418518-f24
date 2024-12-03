@@ -11,6 +11,35 @@ export default function ChangePassword() {
     const [passwordSuccess, setPasswordSuccess] = useState('');
     const navigate = useNavigate();
 
+    useEffect(() => {
+        // Check if the page is being loaded in an iframe
+        if (window.self !== window.top) {
+            document.body.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: white;">
+              <h1 style="color: red; font-family: Arial, sans-serif;">This content cannot be displayed in an iframe.</h1>
+            </div>
+          `;
+            throw new Error("This content cannot be displayed in an iframe.");
+        }
+    }, []);
+
+    // Password validation logic
+    const validatePassword = (password) => {
+        const rules = [
+            { regex: /.{8,}/, message: "At least 8 characters long" },
+            { regex: /[A-Z]/, message: "At least one uppercase letter" },
+            { regex: /[a-z]/, message: "At least one lowercase letter" },
+            { regex: /[0-9]/, message: "At least one number" },
+            { regex: /[!@#$%^&*(),.?":{}|<>]/, message: "At least one special character" },
+        ];
+
+        const errors = rules
+            .filter((rule) => !rule.regex.test(password))
+            .map((rule) => rule.message);
+
+        return errors;
+    };
+
     const handleChangePassword = async (event) => {
         event.preventDefault();
         setPasswordError('');
@@ -19,6 +48,13 @@ export default function ChangePassword() {
         // Validate that new password and confirm password match
         if (newPassword !== confirmPassword) {
             setPasswordError('New password and confirm password do not match.');
+            return;
+        }
+
+        // Validate password complexity
+        const passwordErrors = validatePassword(newPassword);
+        if (passwordErrors.length > 0) {
+            setPasswordError(`Password must meet the following criteria:\n${passwordErrors.join('\n')}`);
             return;
         }
 

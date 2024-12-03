@@ -3,6 +3,18 @@ import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 
 export default function ViewEntries() {
+    useEffect(() => {
+        // Check if the page is being loaded in an iframe
+        if (window.self !== window.top) {
+            document.body.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: white;">
+              <h1 style="color: red; font-family: Arial, sans-serif;">This content cannot be displayed in an iframe.</h1>
+            </div>
+          `;
+            throw new Error("This content cannot be displayed in an iframe.");
+        }
+    }, []);
+
     const [entries, setEntries] = useState([]);
     const [error, setError] = useState('');
     const [updatedEntries, setUpdatedEntries] = useState({}); // Tracks selected status per entry
@@ -207,13 +219,20 @@ export default function ViewEntries() {
                                             />
                                             Reject
                                         </label>
-                                        <input
-                                            type="text"
-                                            placeholder="Reject Reason"
-                                            value={updatedEntries[entry.advisingID]?.rejectReason || ''}
-                                            onChange={(e) => handleRejectReasonChange(entry.advisingID, e.target.value)}
-                                            disabled={updatedEntries[entry.advisingID]?.status !== 'rejected'}
-                                            style={styles.rejectInput}
+                                        <label style={{ display: 'block', marginTop: '10px' }}>Advisor Comments:</label>
+                                        <textarea
+                                            placeholder="Enter comments here"
+                                            value={updatedEntries[entry.advisingID]?.comments || ''}
+                                            onChange={(e) =>
+                                                setUpdatedEntries((prevEntries) => ({
+                                                    ...prevEntries,
+                                                    [entry.advisingID]: {
+                                                        ...prevEntries[entry.advisingID],
+                                                        comments: e.target.value,
+                                                    },
+                                                }))
+                                            }
+                                            style={styles.commentBox}
                                         />
                                     </td>
                                 )}
@@ -389,5 +408,14 @@ const styles = {
         borderRadius: '5px',
         marginRight: '5px',
         marginLeft: '5px',
+    },
+    commentBox: {
+        width: '100%',
+        height: '80px',
+        marginTop: '10px',
+        padding: '10px',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+        resize: 'none',
     },
 };

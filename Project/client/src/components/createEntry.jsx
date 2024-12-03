@@ -3,20 +3,25 @@ import { Helmet } from 'react-helmet';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function CreateEntry() {
+    useEffect(() => {
+        // Check if the page is being loaded in an iframe
+        if (window.self !== window.top) {
+            document.body.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: white;">
+              <h1 style="color: red; font-family: Arial, sans-serif;">This content cannot be displayed in an iframe.</h1>
+            </div>
+          `;
+            throw new Error("This content cannot be displayed in an iframe.");
+        }
+    }, []);
+
     const location = useLocation();
-    /* const entryData = location.state?.entry || {}; // Retrieve passed entry data from viewEntries
-    const [lastTerm, setLastTerm] = useState('');
-    const [lastGPA, setLastGPA] = useState('');
-    const [currentTerm, setCurrentTerm] = useState('');
-    const [selectedItemsPrereqs, setSelectedItemsPrereqs] = useState(['']); // Array to hold each dropdown's selected value
-    const [selectedItemsCourses, setSelectedItemsCourses] = useState(['']); */ // Array to hold each dropdown's selected value
     const entryData = location.state?.entry || {};
     const [lastTerm, setLastTerm] = useState(entryData.lastTerm || '');
     const [lastGPA, setLastGPA] = useState(entryData.lastGPA || '');
     const [currentTerm, setCurrentTerm] = useState(entryData.currentTerm || '');
     const [selectedItemsCourses, setSelectedItemsCourses] = useState([]);
     const [selectedItemsPrereqs, setSelectedItemsPrereqs] = useState([]);
-
     const [courseOptions, setCourseOptions] = useState([]);  // Options for the "Course Plan" dropdown
     const [prereqOptions, setPrereqOptions] = useState([]); // Options for the "Prerequisites" dropdown
     const [previousCourses, setPreviousCourses] = useState([]);

@@ -2,6 +2,18 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function ForgotPassword() {
+    useEffect(() => {
+        // Check if the page is being loaded in an iframe
+        if (window.self !== window.top) {
+            document.body.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: white;">
+              <h1 style="color: red; font-family: Arial, sans-serif;">This content cannot be displayed in an iframe.</h1>
+            </div>
+          `;
+            throw new Error("This content cannot be displayed in an iframe.");
+        }
+    }, []);
+
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
