@@ -5,6 +5,7 @@ import user from "./routes/user.js";
 import prereqs from "./routes/prereqs.js";
 import courses from "./routes/courses.js";
 import records from "./routes/records.js";
+import path from "path";
 
 const app = express();
 const port = 8080;
@@ -17,17 +18,31 @@ const myLogger = function (req, res, next) {
 
 app.use(myLogger);
 app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors({
     origin: "http://localhost:5173"
     //origin: "*"   
     //swap between remote and local deployment
 }))
+
+
+const __dirname = path.resolve();   //this gets root directory
+app.use(express.static(path.join(__dirname, "public")));
+
+app.use((req, res, next) => {
+    res.setHeader("X-Frame-Options", "DENY");
+    next();
+});
+
 app.use('/user', user);
 app.use('/prereqs', prereqs);
 app.use('/courses', courses);
 app.use('/records', records);
 
-
+// Serve iframe-test.html
+app.get("/iframe-test", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "iframe-test.html"));
+});
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`);

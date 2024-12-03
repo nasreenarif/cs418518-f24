@@ -2,9 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from "react-router-dom";
 
-/* import "../styles/loginStyle.css" */
-
-
 
 export default function Login() {
     const [enteredEmail, setEnteredEmail] = useState("");
@@ -284,81 +281,3 @@ const styles = {
         cursor: "pointer",
     },
 };
-
-/* const handleLogin = async (event) => {
-        event.preventDefault();
-        setSubmitted(true);
-
-        try {
-            const formBody = JSON.stringify({
-                email: enteredEmail,
-                Password: enteredPassword
-            });
-
-            const response = await fetch('http://localhost:8080/user/login', {
-                method: "POST",
-                body: formBody,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-            console.log('Fetched user data:', data);
-
-            if (data.status === 403) {
-                setErrorMessage('Please verify your email before logging in.');
-                return;
-            }
-
-            if (data.status === 401) {
-                setErrorMessage('Invalid email or password. Please try again.');
-                return;
-            }
-
-            if (data.status === 200 && data.message === "User sent 2FA Code") {
-                setIs2FARequired(true); // Show the 2FA input field
-                setDisplayEmail("");    // Clear display email field
-                setErrorMessage('');    // Clear any previous error message
-                setUserStateVal(1);     // Update user state value as necessary
-                console.log("2FA required, waiting for code.");
-            } else {
-                setErrorMessage('Unexpected response from the server.');
-            }
-        } catch (error) {
-            setErrorMessage('Login failed. Please check your credentials and try again.');
-            console.error('Error during login:', error);
-        }
-    }; */
-
-/* const handleVerify2FA = async (event) => {
-    event.preventDefault();
-
-    try {
-        const formBody = JSON.stringify({
-            email: enteredEmail,
-            Code2FA: Code2FA
-        });
-
-        const response = await fetch('http://localhost:8080/user/verify-code', {
-            method: "POST",
-            body: formBody,
-            headers: {
-                'content-type': 'application/json'
-            }
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert("Login successful");
-            localStorage.setItem('storedEmail', JSON.stringify(enteredEmail)); // Store email AFTER 2FA success
-            navigate('/dashboard');
-        } else {
-            setErrorMessage(data.message || '2FA verification failed');
-        }
-
-    } catch (error) {
-        setErrorMessage(error.message);
-    }
-}; */
