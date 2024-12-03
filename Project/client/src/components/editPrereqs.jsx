@@ -25,7 +25,8 @@ export default function CourseCatalog() {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await fetch('http://localhost:8080/courses/list');
+                const response = await fetch('https://cs418-advising-website.onrender.com/courses/list');
+                /* const response = await fetch('http://localhost:8080/courses/list'); */
                 if (!response.ok) throw new Error('Failed to fetch courses');
                 const data = await response.json();
                 console.log("Data fetched:", data);
@@ -42,7 +43,8 @@ export default function CourseCatalog() {
     useEffect(() => {
         const fetchPrerequisites = async () => {
             try {
-                const response = await fetch('http://localhost:8080/prereqs/list');
+                const response = await fetch('https://cs418-advising-website.onrender.com/prereqs/list');
+                /* const response = await fetch('http://localhost:8080/prereqs/list'); */
                 if (!response.ok) throw new Error('Failed to fetch prerequisites');
                 const data = await response.json();
                 setPrerequisites(data); // Assuming the response is an array
@@ -74,7 +76,8 @@ export default function CourseCatalog() {
 
         try {
             if (prerequisitesToAdd.length > 0) {
-                await fetch('http://localhost:8080/prereqs/add', {
+                await fetch('https://cs418-advising-website.onrender.com/prereqs/add', {
+                    /* await fetch('http://localhost:8080/prereqs/add', { */
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -84,7 +87,8 @@ export default function CourseCatalog() {
             }
 
             if (prerequisitesToDelete.length > 0) {
-                await fetch('http://localhost:8080/prereqs/delete', {
+                await fetch('https://cs418-advising-website.onrender.com/prereqs/delete', {
+                    /* await fetch('http://localhost:8080/prereqs/delete', { */
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

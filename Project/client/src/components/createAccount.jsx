@@ -52,7 +52,8 @@ export default function CreateAccount() {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/user', {
+            const response = await fetch('https://cs418-advising-website.onrender.com/user', {
+                /* const response = await fetch('http://localhost:8080/user', { */
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -59,7 +59,8 @@ export default function ChangePassword() {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/user/change-password', {
+            const response = await fetch('https://cs418-advising-website.onrender.com/user/change-password', {
+                /* const response = await fetch('http://localhost:8080/user/change-password', { */
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -86,46 +87,6 @@ export default function ChangePassword() {
         }
     };
 
-    /* const handleChangePassword = async (event) => {
-        event.preventDefault();
-        setPasswordError('');
-        setPasswordSuccess('');
-
-        // Validate that new password and confirm password match
-        if (newPassword !== confirmPassword) {
-            setPasswordError('New password and confirm password do not match.');
-            return;
-        }
-
-        try {
-            // Make a POST request to your backend API to change the password
-            const response = await fetch('http://localhost:8080/user/change-password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,  // Added email to the payload
-                    currentPassword: currentPassword,
-                    newPassword: newPassword,
-                }),
-            });
-
-            // Handle API response
-            if (!response.ok) {
-                throw new Error('Password change failed');
-            }
-
-            // If successful, reset the form fields and display success message
-            setPasswordSuccess('Password changed successfully!');
-            setEmail('');
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-        } catch (error) {
-            setPasswordError('Failed to change password. Please try again.');
-        }
-    }; */
 
     return (
         <div style={styles.container}>

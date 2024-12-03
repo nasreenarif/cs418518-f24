@@ -33,7 +33,8 @@ export default function VerifyCode() {
                 verificationCode: verificationCode
             });
 
-            const response = await fetch('http://localhost:8080/user/verify-2fa', {
+            const response = await fetch('https://cs418-advising-website.onrender.com/user/verify-2fa', {
+                /* const response = await fetch('http://localhost:8080/user/verify-2fa', { */
                 method: "POST",
                 body: formBody,
                 headers: {

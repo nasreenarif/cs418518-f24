@@ -30,7 +30,8 @@ export default function ViewEntries() {
     useEffect(() => {
         async function fetchEntries() {
             try {
-                const response = await fetch(isAdmin ? `http://localhost:8080/records` : `http://localhost:8080/records?email=${email}`);
+                const response = await fetch(isAdmin ? `https://cs418-advising-website.onrender.com/records` : `https://cs418-advising-website.onrender.com/records?email=${email}`);
+                /* const response = await fetch(isAdmin ? `http://localhost:8080/records` : `http://localhost:8080/records?email=${email}`); */
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -49,25 +50,13 @@ export default function ViewEntries() {
         fetchEntries();
     }, [email, isAdmin]);
 
-    // Currently working - Fetch student data and open modal
-    /* const handleStudentEmailClick = async (studentEmail, advisingID) => {
-        try {
-            //updated to RECORDS/student-info
-            const response = await fetch(`http://localhost:8080/records/student-info?email=${studentEmail}&advisingID=${advisingID}`);
-            const data = await response.json();
-            if (!response.ok) throw new Error('Failed to fetch student info');
-            setModalData({ ...data, studentEmail }); // Set modal content
-            setIsModalOpen(true); // Open modal
-        } catch (error) {
-            console.error('Error fetching student info:', error);
-            setError('Failed to load student information.');
-        }
-    }; */
+
 
     const handleStudentEmailClick = async (studentEmail, advisingID) => {
         try {
             // Fetch the full record data from the backend
-            const response = await fetch(`http://localhost:8080/records/student-info?email=${studentEmail}&advisingID=${advisingID}`);
+            const response = await fetch(`https://cs418-advising-website.onrender.com/records/student-info?email=${studentEmail}&advisingID=${advisingID}`);
+            /* const response = await fetch(`http://localhost:8080/records/student-info?email=${studentEmail}&advisingID=${advisingID}`); */
             const data = await response.json();
 
             if (!response.ok) throw new Error('Failed to fetch student info');
@@ -114,7 +103,8 @@ export default function ViewEntries() {
 
     const handleSubmitChanges = async () => {
         try {
-            const response = await fetch('http://localhost:8080/records/update-status', {
+            const response = await fetch('https://cs418-advising-website.onrender.com/records/update-status', {
+                /* const response = await fetch('http://localhost:8080/records/update-status', { */
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,7 +119,8 @@ export default function ViewEntries() {
             alert('Entries updated and emails sent successfully');
 
             // Refetch entries to update the UI after submission
-            const refreshedEntries = await fetch(`http://localhost:8080/records`);
+            const refreshedEntries = await fetch(`https://cs418-advising-website.onrender.com/records`);
+            /* const refreshedEntries = await fetch(`http://localhost:8080/records`); */
             setEntries(await refreshedEntries.json());
             setUpdatedEntries({});
         } catch (error) {
@@ -137,32 +128,6 @@ export default function ViewEntries() {
             setError('Failed to update entries. Please try again later.');
         }
     };
-
-
-    /* const handleSubmitChanges = async () => {
-        try {
-            const response = await fetch('http://localhost:8080/records', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updatedEntries),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update entries');
-            }
-
-            alert('Entries updated successfully');
-            // Refetch entries to update the UI after submission
-            const refreshedEntries = await fetch(`http://localhost:8080/records`);
-            setEntries(await refreshedEntries.json());
-            setUpdatedEntries({});
-        } catch (error) {
-            console.error('Error updating entries:', error);
-            setError('Failed to update entries. Please try again later.');
-        }
-    }; */
 
     return (
         <div style={styles.container}>

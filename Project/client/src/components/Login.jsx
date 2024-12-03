@@ -48,7 +48,8 @@ export default function Login() {
                 Password: enteredPassword
             });
 
-            const response = await fetch('http://localhost:8080/user/login', {
+            const response = await fetch('https://cs418-advising-website.onrender.com/user/login', {
+                /* const response = await fetch('http://localhost:8080/user/login', { */
                 method: "POST",
                 body: formBody,
                 headers: {
@@ -96,7 +97,8 @@ export default function Login() {
                 Code2FA: Code2FA
             });
 
-            const response = await fetch('http://localhost:8080/user/verify-code', {
+            const response = await fetch('https://cs418-advising-website.onrender.com/user/verify-code', {
+                /* const response = await fetch('http://localhost:8080/user/verify-code', { */
                 method: "POST",
                 body: formBody,
                 headers: {
