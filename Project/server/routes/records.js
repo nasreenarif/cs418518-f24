@@ -27,13 +27,14 @@ records.get('/student-info', async (req, res) => {
 
     try {
         console.log('/student-info route accessed with email:', email);
+        console.log(' and advisingID:', advisingID);
 
         // Query userdata for First_Name and Last_Name
         const [userResults] = await connection.query('SELECT First_Name, Last_Name FROM userdata WHERE Email = ?', [email]);
         const user = userResults[0]; // Access the first result from userdata query
 
-        // Query records for lastTerm and lastGPA
-        const [recordResults] = await connection.query('SELECT advisingID, lastTerm, lastGPA FROM records WHERE studentEmail = ?', [email]);
+        // Query records for lastTerm lastGPA, currentTerm, status
+        const [recordResults] = await connection.query('SELECT lastTerm, lastGPA, currentTerm, status FROM records WHERE studentEmail = ? AND advisingID = ?', [email, advisingID]);
         const record = recordResults[0]; // Access the first result from records query
 
         const [courseMappingResults] = await connection.query(
@@ -53,8 +54,10 @@ records.get('/student-info', async (req, res) => {
                 firstName: user.First_Name,
                 lastName: user.Last_Name,
                 lastTerm: record.lastTerm,
+                currentTerm: record.currentTerm,
                 lastGPA: record.lastGPA,
                 advisingID: record.advisingID,
+                status: record.status,
                 courses: courseMappingResults,
                 prereqs: prereqMappingResults,
             });

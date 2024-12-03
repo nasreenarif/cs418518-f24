@@ -37,9 +37,8 @@ export default function ViewEntries() {
         fetchEntries();
     }, [email, isAdmin]);
 
-
-    // Fetch student data and open modal
-    const handleStudentEmailClick = async (studentEmail, advisingID) => {
+    // Currently working - Fetch student data and open modal
+    /* const handleStudentEmailClick = async (studentEmail, advisingID) => {
         try {
             //updated to RECORDS/student-info
             const response = await fetch(`http://localhost:8080/records/student-info?email=${studentEmail}&advisingID=${advisingID}`);
@@ -51,29 +50,31 @@ export default function ViewEntries() {
             console.error('Error fetching student info:', error);
             setError('Failed to load student information.');
         }
+    }; */
+
+    const handleStudentEmailClick = async (studentEmail, advisingID) => {
+        try {
+            // Fetch the full record data from the backend
+            const response = await fetch(`http://localhost:8080/records/student-info?email=${studentEmail}&advisingID=${advisingID}`);
+            const data = await response.json();
+
+            if (!response.ok) throw new Error('Failed to fetch student info');
+
+            // For admin or non-pending statuses, display the modal
+            setModalData({ ...data, studentEmail, status: data.status });
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching student info:', error);
+            setError('Failed to load student information.');
+        }
     };
+
 
     // Close the modal
     const closeModal = () => {
         setIsModalOpen(false);
         setModalData(null);
     };
-
-    /* // Handle checkbox selection for Accept and Reject for each specific entry
-    const handleStatusChange = (advisingID, status) => {
-        setUpdatedEntries((prevEntries) => ({
-            ...prevEntries,
-            [advisingID]: { ...prevEntries[advisingID], status } // Update only the specific entry's status
-        }));
-    };
-
-    // Handle text entry for the Reject Reason
-    const handleRejectReasonChange = (advisingID, reason) => {
-        setUpdatedEntries((prevEntries) => ({
-            ...prevEntries,
-            [advisingID]: { ...prevEntries[advisingID], rejectReason: reason }
-        }));
-    }; */
 
     // Handle Accept checkbox selection
     const handleAcceptChange = (advisingID) => {
@@ -270,6 +271,16 @@ export default function ViewEntries() {
                             )}
                         </ul>
 
+                        {/* Conditional Edit Button */}
+                        {!isAdmin && modalData.status === "Pending" && (
+                            <button
+                                onClick={() => navigate('/create-entry', { state: { entry: modalData } })}
+                                style={styles.closeButton}
+                            >
+                                Edit
+                            </button>
+                        )}
+
                         <button onClick={closeModal} style={styles.closeButton}>Close</button>
                     </div>
                 </div>
@@ -376,5 +387,7 @@ const styles = {
         border: 'none',
         cursor: 'pointer',
         borderRadius: '5px',
+        marginRight: '5px',
+        marginLeft: '5px',
     },
 };
