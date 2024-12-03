@@ -50,7 +50,7 @@ app.get("/iframe-test", (req, res) => {
 
 // Catch-all handler to serve the React app for any route not handled by other middleware
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'build', 'Login.jsx'));
 });
 
 app.listen(port, () => {
