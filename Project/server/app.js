@@ -2,12 +2,16 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
 import path from "path";
+import fileURLToPath from "url";
 
 import user from "./routes/user.js";
 import prereqs from "./routes/prereqs.js";
 import courses from "./routes/courses.js";
 import records from "./routes/records.js";
 
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.resolve();   //this gets root directory
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -18,7 +22,7 @@ const myLogger = function (req, res, next) {
     console.log('Api calling finished');
 }
 
-const __dirname = path.resolve();   //this gets root directory
+
 
 app.use(myLogger);
 app.use(bodyParser.json());
@@ -56,22 +60,22 @@ app.get("/iframe-test", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "iframe-test.html"));
 });
 
-if (process.env.NODE_ENV === "production") {
+/* if (process.env.NODE_ENV === "production") {
     const clientBuildPath = path.join(__dirname, "client", "build");
     app.use(express.static(clientBuildPath));
     app.get('*', (req, res) => {
         res.sendFile(path.join(clientBuildPath, "index.html"));
     });
-}
+} */
 
-/* // Serve React frontend ?
-const clientBuildPath = path.join(__dirname, 'client', 'build');
-app.use(express.static(clientBuildPath));
+// Serve React frontend ?
+const buildPath = path.join(__dirname, '../client/dist');
+app.use(express.static(buildPath));
 
 // Catch-all handler to serve the React app for any route not handled by other middleware
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'App.jsx'));
-}); */
+});
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`);

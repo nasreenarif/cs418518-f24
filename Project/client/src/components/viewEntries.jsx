@@ -30,7 +30,7 @@ export default function ViewEntries() {
     useEffect(() => {
         async function fetchEntries() {
             try {
-                const response = await fetch(isAdmin ? `/api/records` : `/api/records?email=${email}`);
+                const response = await fetch(isAdmin ? `https://cs418-advising-website.onrender.com/records` : `https://cs418-advising-website.onrender.com/records?email=${email}`);
                 /* const response = await fetch(isAdmin ? `http://localhost:8080/records` : `http://localhost:8080/records?email=${email}`); */
                 const data = await response.json();
 
@@ -55,7 +55,7 @@ export default function ViewEntries() {
     const handleStudentEmailClick = async (studentEmail, advisingID) => {
         try {
             // Fetch the full record data from the backend
-            const response = await fetch(`/api/records/student-info?email=${studentEmail}&advisingID=${advisingID}`);
+            const response = await fetch(`https://cs418-advising-website.onrender.com/records/student-info?email=${studentEmail}&advisingID=${advisingID}`);
             /* const response = await fetch(`http://localhost:8080/records/student-info?email=${studentEmail}&advisingID=${advisingID}`); */
             const data = await response.json();
 
@@ -103,7 +103,7 @@ export default function ViewEntries() {
 
     const handleSubmitChanges = async () => {
         try {
-            const response = await fetch('/api/records/update-status', {
+            const response = await fetch('https://cs418-advising-website.onrender.com/records/update-status', {
                 /* const response = await fetch('http://localhost:8080/records/update-status', { */
                 method: 'POST',
                 headers: {
@@ -119,7 +119,7 @@ export default function ViewEntries() {
             alert('Entries updated and emails sent successfully');
 
             // Refetch entries to update the UI after submission
-            const refreshedEntries = await fetch(`/api/records`);
+            const refreshedEntries = await fetch(`https://cs418-advising-website.onrender.com/records`);
             /* const refreshedEntries = await fetch(`http://localhost:8080/records`); */
             setEntries(await refreshedEntries.json());
             setUpdatedEntries({});

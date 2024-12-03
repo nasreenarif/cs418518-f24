@@ -38,13 +38,13 @@ export default function CreateEntry() {
         async function fetchDropdownOptions() {
             try {
                 // Fetch course options
-                const courseResponse = await fetch('/api/courses/droplist');
+                const courseResponse = await fetch('https://cs418-advising-website.onrender.com/courses/droplist');
                 /* const courseResponse = await fetch('http://localhost:8080/courses/droplist'); */
                 const courseData = await courseResponse.json();
                 if (!courseResponse.ok) throw new Error('Failed to fetch course options');
 
                 // Fetch prerequisite options
-                const prereqResponse = await fetch('/api/prereqs/list');
+                const prereqResponse = await fetch('https://cs418-advising-website.onrender.com/prereqs/list');
                 /* const prereqResponse = await fetch('http://localhost:8080/prereqs/list'); */
                 const prereqData = await prereqResponse.json();
                 if (!prereqResponse.ok) throw new Error('Failed to fetch prerequisite options');
@@ -76,7 +76,7 @@ export default function CreateEntry() {
     useEffect(() => {
         async function fetchPreviousCourses() {
             try {
-                const response = await fetch(`/api/records/previous-courses?email=${email}`);
+                const response = await fetch(`https://cs418-advising-website.onrender.com/records/previous-courses?email=${email}`);
                 /* const response = await fetch(`http://localhost:8080/records/previous-courses?email=${email}`); */
                 if (!response.ok) {
                     throw new Error('Failed to fetch already scheduled courses');
@@ -123,7 +123,7 @@ export default function CreateEntry() {
                 selectedItems2: selectedCourseIDs, // Send mapped course IDs
             });
 
-            const response = await fetch('/api/records/create-entry', {
+            const response = await fetch('https://cs418-advising-website.onrender.com/records/create-entry', {
                 /* const response = await fetch('http://localhost:8080/records/create-entry', { */
                 method: 'POST',
                 headers: {
