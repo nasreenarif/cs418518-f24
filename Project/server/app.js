@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors({
     /* origin: "http://localhost:5173" */
-    origin: "*"
+    origin: "https://cs418-advising-website.onrender.com"
     //swap between remote and local deployment
 }))
 
