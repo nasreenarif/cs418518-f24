@@ -8,7 +8,7 @@ import records from "./routes/records.js";
 import path from "path";
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 const myLogger = function (req, res, next) {
     console.log('Calling Api');
@@ -27,7 +27,10 @@ app.use(cors({
 
 
 const __dirname = path.resolve();   //this gets root directory
-app.use(express.static(path.join(__dirname, "public")));
+
+/* app.use(express.static(path.join(__dirname, "public"))); */
+// \/ swap with \/ \/
+// Serve React frontend ?
 
 app.use((req, res, next) => {
     res.setHeader("X-Frame-Options", "DENY");
@@ -48,9 +51,13 @@ app.get("/iframe-test", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "iframe-test.html"));
 });
 
+// Serve React frontend ?
+const clientBuildPath = path.join(__dirname, 'client', 'build');
+app.use(express.static(clientBuildPath));
+
 // Catch-all handler to serve the React app for any route not handled by other middleware
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'Login.jsx'));
+    res.sendFile(path.join(__dirname, 'build', 'App.jsx'));
 });
 
 app.listen(port, () => {

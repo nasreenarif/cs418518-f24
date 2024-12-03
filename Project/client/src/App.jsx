@@ -19,9 +19,6 @@ import Reset from "./components/reset"; */
 function App() {
 
   return (
-
-
-
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/dashboard" element={<Dashboard />} />
@@ -34,11 +31,6 @@ function App() {
       <Route path="/view-entries" element={<ViewEntries />} />
       <Route path="/edit-prereqs" element={<EditPrereqs />} />
     </Routes>
-
-
-
-
-
   );
 }
 
