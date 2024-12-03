@@ -5,8 +5,8 @@ const courses = Router();
 
 courses.get('/list', async (req, res) => {
     try {
-        // Use `await` instead of a callback function
-        const [rows] = await connection.execute('SELECT * FROM coursecatalog');
+        const [rows] = await connection.execute('SELECT courseID, CourseCode, CourseName FROM coursecatalog');
+        console.log('Fetched course rows:', rows);
         res.status(200).json({ data: rows });
     } catch (error) {
         console.error('Error fetching courses:', error);
@@ -17,7 +17,7 @@ courses.get('/list', async (req, res) => {
 courses.get('/droplist', async (req, res) => {
     try {
         const [rows] = await connection.execute('SELECT courseID, courseCode, courseName FROM coursecatalog');
-        console.log('Fetched rows:', rows);
+        console.log('Fetched droplist rows:', rows);
         res.status(200).json(rows);
     } catch (error) {
         console.error('Error fetching prerequisites:', error);

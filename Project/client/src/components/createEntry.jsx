@@ -1,21 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function CreateEntry() {
+    const location = useLocation();
+    /* const entryData = location.state?.entry || {}; // Retrieve passed entry data from viewEntries
     const [lastTerm, setLastTerm] = useState('');
     const [lastGPA, setLastGPA] = useState('');
     const [currentTerm, setCurrentTerm] = useState('');
+    const [selectedItemsPrereqs, setSelectedItemsPrereqs] = useState(['']); // Array to hold each dropdown's selected value
+    const [selectedItemsCourses, setSelectedItemsCourses] = useState(['']); */ // Array to hold each dropdown's selected value
+    const entryData = location.state?.entry || {};
+    const [lastTerm, setLastTerm] = useState(entryData.lastTerm || '');
+    const [lastGPA, setLastGPA] = useState(entryData.lastGPA || '');
+    const [currentTerm, setCurrentTerm] = useState(entryData.currentTerm || '');
+    const [selectedItemsCourses, setSelectedItemsCourses] = useState([]);
+    const [selectedItemsPrereqs, setSelectedItemsPrereqs] = useState([]);
+
+    const [courseOptions, setCourseOptions] = useState([]);  // Options for the "Course Plan" dropdown
+    const [prereqOptions, setPrereqOptions] = useState([]); // Options for the "Prerequisites" dropdown
+    const [previousCourses, setPreviousCourses] = useState([]);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const [selectedItemsPrereqs, setSelectedItemsPrereqs] = useState(['']); // Array to hold each dropdown's selected value
-    const [selectedItemsCourses, setSelectedItemsCourses] = useState(['']); // Array to hold each dropdown's selected value
-    const [courseOptions, setCourseOptions] = useState([]);  // Options for the "Course Plan" dropdown
-    const [prereqOptions, setPrereqOptions] = useState([]);  // Options for the "Prerequisites" dropdown
-    const [previousCourses, setPreviousCourses] = useState([]);
     const navigate = useNavigate();
-
     const email = JSON.parse(localStorage.getItem('storedEmail'));  // Get stored email
+
+    useEffect(() => {
+        console.log('Received entry data:', entryData);
+    }, [entryData]);
 
     useEffect(() => {
         async function fetchDropdownOptions() {
@@ -23,20 +35,28 @@ export default function CreateEntry() {
                 // Fetch course options
                 const courseResponse = await fetch('http://localhost:8080/courses/droplist');
                 const courseData = await courseResponse.json();
-
-                if (!courseResponse.ok) {
-                    throw new Error('Failed to fetch course options');
-                }
-                setCourseOptions(courseData);
+                if (!courseResponse.ok) throw new Error('Failed to fetch course options');
 
                 // Fetch prerequisite options
                 const prereqResponse = await fetch('http://localhost:8080/prereqs/list');
                 const prereqData = await prereqResponse.json();
+                if (!prereqResponse.ok) throw new Error('Failed to fetch prerequisite options');
 
-                if (!prereqResponse.ok) {
-                    throw new Error('Failed to fetch prerequisite options');
-                }
+                setCourseOptions(courseData);
                 setPrereqOptions(prereqData);
+
+                console.log('Fetched prerequisite options:', prereqData);
+                // Update dropdown selections after options are fetched
+                setSelectedItemsCourses(
+                    entryData.courses?.map((course) =>
+                        courseData.find((option) => option.courseCode === course.courseCode)?.courseCode || ''
+                    ) || []
+                );
+                setSelectedItemsPrereqs(
+                    entryData.prereqs?.map((prereq) =>
+                        prereqData.find((option) => option.preCourseCode === prereq.preCourseCode)?.preCourseCode || ''
+                    ) || []
+                );
 
             } catch (error) {
                 console.error('Error fetching dropdown options:', error);
@@ -44,7 +64,7 @@ export default function CreateEntry() {
             }
         }
         fetchDropdownOptions();
-    }, []);
+    }, []); //fill these brackets with entryData to bring back endless loop
 
     useEffect(() => {
         async function fetchPreviousCourses() {
@@ -66,9 +86,56 @@ export default function CreateEntry() {
     }, [email]);
 
     const handleCreateEntry = async (event) => {
+        console.log('handleCreateEntry triggered');
         event.preventDefault();
         setMessage('');
         setError('');
+
+        /* try {
+            const selectedCourseIDs = selectedItemsCourses
+                .map((courseCode) => courseOptions.find((opt) => opt.courseCode === courseCode)?.courseID)
+                .filter(Boolean);
+
+            const selectedPrereqIDs = selectedItemsPrereqs
+                .map((courseCode) => prereqOptions.find((opt) => opt.preCourseCode === courseCode)?.courseID)
+                .filter(Boolean);
+
+            console.log('Submitting data:', {
+                email,
+                lastTerm,
+                lastGPA,
+                currentTerm,
+                selectedItems1: selectedPrereqIDs,
+                selectedItems2: selectedCourseIDs,
+            });
+
+            const response = await fetch('http://localhost:8080/records/create-entry', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    lastTerm,
+                    lastGPA,
+                    currentTerm,
+                    selectedItems1: selectedPrereqIDs,
+                    selectedItems2: selectedCourseIDs,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Backend error:', errorData);
+                setError(errorData.message || 'An unknown error occurred.');
+                return;
+            }
+
+            setMessage('Entry submitted successfully!');
+            setTimeout(() => navigate('/dashboard'), 2000);
+        } catch (error) {
+            console.error('Error submitting entry:', error);
+            setError('Failed to submit entry. Please try again.');
+        }
+    }; */
 
         // Map courseCode to courseID for selected courses
         const selectedCourseIDs = selectedItemsCourses.map(courseCode => {
@@ -132,63 +199,6 @@ export default function CreateEntry() {
             setError('Failed to submit entry. Please try again.');
         }
     };
-
-    /* const handleCreateEntry = async (event) => {
-        event.preventDefault();
-        setMessage('');
-        setError('');
-
-        console.log("Selected Items Prereqs (courseCodes):", selectedItemsPrereqs);
-        console.log("Prereq Options (should include courseID and courseCode):", prereqOptions);
-
-        // Map courseCode to courseID for selected courses
-        const selectedCourseIDs = selectedItemsCourses.map(courseCode => {
-            const course = courseOptions.find(option => option.courseCode === courseCode);
-            return course ? course.courseID : null;
-        }).filter(courseID => courseID !== null); // Filter out any nulls
-
-        // Map courseCode to courseID for selected prerequisites
-        const selectedPrereqIDs = selectedItemsPrereqs.map(courseCode => {
-            const prereq = prereqOptions.find(option => option.preCourseCode === courseCode);
-            if (!prereq) {
-                console.log(`No match found for courseCode: ${courseCode} in prereqOptions`);
-            }
-            return prereq ? prereq.courseID : null;
-        }).filter(courseID => courseID !== null); // Filter out any nulls
-
-        try {
-            const response = await fetch('http://localhost:8080/records/create-entry', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    lastTerm,
-                    lastGPA,
-                    currentTerm,
-                    selectedItems1: selectedPrereqIDs, // Send mapped course IDs
-                    selectedItems2: selectedCourseIDs,  // Send mapped course IDs
-                }),
-            });
-
-            console.log("Selected Prereq IDs:", selectedPrereqIDs);
-            console.log("Selected Course IDs:", selectedCourseIDs);
-
-
-            if (!response.ok) {
-                throw new Error('Failed to create entry');
-            }
-
-            setMessage('Entry submitted successfully!');
-            setTimeout(() => {
-                navigate('/dashboard'); // Redirect to dashboard after success
-            }, 2000);
-        } catch (error) {
-            setError('Failed to submit entry. Please try again.');
-        }
-    }; */
-
 
     //handles dropdown change
     const handleDropdownChangeList1 = (index, value) => {
@@ -256,6 +266,25 @@ export default function CreateEntry() {
                     <label>Select Prerequisites:</label>
                     {selectedItemsPrereqs.map((selectedItem, index) => (
                         <select
+                            key={index}
+                            value={selectedItem}
+                            onChange={(e) => {
+                                const newPrereqs = [...selectedItemsPrereqs];
+                                newPrereqs[index] = e.target.value;
+                                setSelectedItemsPrereqs(newPrereqs);
+                            }}
+                        >
+                            <option value="" disabled>Prerequisite Courses</option>
+                            {prereqOptions.map((option) => (
+                                <option key={option.preCourseCode} value={option.preCourseCode}>
+                                    {option.preCourseName}
+                                </option>
+                            ))}
+                        </select>
+                    ))}
+                    {/* currently working */}
+                    {/* {selectedItemsPrereqs.map((selectedItem, index) => (
+                        <select
                             key={`list1-${index}`}
                             value={selectedItem}
                             onChange={(e) => handleDropdownChangeList1(index, e.target.value)}
@@ -268,7 +297,7 @@ export default function CreateEntry() {
                                 </option>
                             ))}
                         </select>
-                    ))}
+                    ))} */}
                 </div>
 
                 {/*button to add new prereq*/}
@@ -283,6 +312,25 @@ export default function CreateEntry() {
                     <label>Course Plan:</label>
                     {selectedItemsCourses.map((selectedItem, index) => (
                         <select
+                            key={index}
+                            value={selectedItem}
+                            onChange={(e) => {
+                                const newCourses = [...selectedItemsCourses];
+                                newCourses[index] = e.target.value;
+                                setSelectedItemsCourses(newCourses);
+                            }}
+                        >
+                            <option value="" disabled>Planned Courses</option>
+                            {courseOptions.map((option) => (
+                                <option key={option.courseCode} value={option.courseCode}>
+                                    {option.courseName}
+                                </option>
+                            ))}
+                        </select>
+                    ))}
+                    {/* currently working */}
+                    {/* {selectedItemsCourses.map((selectedItem, index) => (
+                        <select
                             key={`list2-${index}`}
                             value={selectedItem}
                             onChange={(e) => handleDropdownChangeList2(index, e.target.value)}
@@ -295,7 +343,7 @@ export default function CreateEntry() {
                                 </option>
                             ))}
                         </select>
-                    ))}
+                    ))} */}
                 </div>
 
                 {/*button to add new course*/}

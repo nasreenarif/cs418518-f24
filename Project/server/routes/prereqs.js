@@ -6,7 +6,7 @@ const prereqs = Router();
 prereqs.get('/list', async (req, res) => {
     try {
         const [rows] = await connection.execute('SELECT courseID, preCourseCode, preCourseName FROM prereqcatalog');
-        console.log('Fetched rows:', rows);
+        console.log('Fetched prereq rows:', rows);
         res.status(200).json(rows);
     } catch (error) {
         console.error('Error fetching prerequisites:', error);
