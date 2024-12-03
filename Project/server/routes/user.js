@@ -50,7 +50,7 @@ user.post("/", async (req, res) => {
 
     // Generate verification link
     /* const verificationLink = `http://localhost:8080/user/verify?token=${verificationToken}`; */
-    const verificationLink = `http://https://cs418-advising-website.onrender.com/user/verify?token=${verificationToken}`;
+    const verificationLink = `http:///api/user/verify?token=${verificationToken}`;
 
     // Send verification email
     await SendMail(email, "Archer Advising Email Verification", `Please verify your account by clicking this link: ${verificationLink}`);

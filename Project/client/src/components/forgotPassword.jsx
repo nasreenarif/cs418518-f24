@@ -23,7 +23,7 @@ export default function ForgotPassword() {
         setMessage('');
 
         try {
-            const response = await fetch('https://cs418-advising-website.onrender.com/user/forgot-password', {
+            const response = await fetch('/api/user/forgot-password', {
                 /* const response = await fetch('http://localhost:8080/user/forgot-password', { */
                 method: 'POST',
                 headers: {
